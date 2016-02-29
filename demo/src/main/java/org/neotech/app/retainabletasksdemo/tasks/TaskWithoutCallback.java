@@ -9,7 +9,7 @@ import org.neotech.library.retainabletasks.Task;
 /**
  * Created by Rolf on 29-2-2016.
  */
-public class TaskWithoutCallback extends Task<Void, String> {
+public class TaskWithoutCallback extends Task<Void, Void> {
 
     private final Context context;
 
@@ -19,13 +19,18 @@ public class TaskWithoutCallback extends Task<Void, String> {
     }
 
     @Override
-    protected String doInBackground() {
-        SystemClock.sleep(5000);
-        return "Result";
+    protected Void doInBackground() {
+        SystemClock.sleep(4000);
+        return null;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        Toast.makeText(context, "'Task without UI callback' started.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onPostExecute() {
-        Toast.makeText(context, "Task finished, result: " + getResult(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "'Task without UI callback' finished.", Toast.LENGTH_SHORT).show();
     }
 }

@@ -17,7 +17,8 @@ import org.neotech.library.retainabletasks.TaskHandler;
 
 public class Main extends AppCompatActivity implements View.OnClickListener, Task.AdvancedCallback, OnAlertDialogClickListener {
 
-    private static final String TASK_SIMPLE = "Demo-task";
+    private static final String TASK_PROGRESS = "Demo-task";
+    private static final String DIALOG_PROGRESS = "progress-dialog";
 
     private ProgressDialog progressDialog;
 
@@ -25,31 +26,38 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(this);
+        findViewById(R.id.fab).setOnClickListener(this);
+
+        findViewById(R.id.button_no_ui_task).setOnClickListener(this);
+        findViewById(R.id.button_progress_task).setOnClickListener(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        progressDialog = ProgressDialog.getExistingInstance(getSupportFragmentManager(), "progress-dialog");
-        getTaskHandler().attachListener(TASK_SIMPLE, this);
+        progressDialog = ProgressDialog.getExistingInstance(getSupportFragmentManager(), DIALOG_PROGRESS);
+        getTaskHandler().attachListener(TASK_PROGRESS, this);
     }
 
     @Override
     public void onClick(View v) {
-        if(getTaskHandler().isRunning(TASK_SIMPLE)){
-            Toast.makeText(this, "Task already running", Toast.LENGTH_SHORT).show();
+        final int id = v.getId();
+        if(id == R.id.fab){
+            //TODO info
+        } else if(id == R.id.button_progress_task) {
+            if (getTaskHandler().isRunning(TASK_PROGRESS)) {
+                Toast.makeText(this, "Task already running.", Toast.LENGTH_SHORT).show();
+            }
+            SimpleTask task = new SimpleTask(TASK_PROGRESS);
+            getTaskHandler().execute(task, this);
+
+        } else if(id == R.id.button_no_ui_task){
+            TaskWithoutCallback task = new TaskWithoutCallback(this);
+            TaskExecutor.execute(task);
+
         }
-
-        SimpleTask task = new SimpleTask(TASK_SIMPLE);
-        getTaskHandler().execute(task, this);
-
-        TaskWithoutCallback callback = new TaskWithoutCallback(this);
-        TaskExecutor.execute(callback);
     }
 
     public TaskHandler getTaskHandler(){
@@ -58,19 +66,19 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
 
     @Override
     public void onPreExecute(Task<?, ?> task) {
-        progressDialog = ProgressDialog.showIfNotShowing(getSupportFragmentManager(), "progress-dialog");
+        progressDialog = ProgressDialog.showIfNotShowing(getSupportFragmentManager(), DIALOG_PROGRESS);
     }
 
     @Override
     public void onPostExecute(Task<?, ?> task) {
         progressDialog.dismiss();
-        Snackbar.make(findViewById(android.R.id.content), "Task finished.", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(android.R.id.content), "'Progress task' finished.", Snackbar.LENGTH_LONG).show();
     }
 
     @Override
     public void onCanceled(Task<?, ?> task) {
         progressDialog.dismiss();
-        Snackbar.make(findViewById(android.R.id.content), "Task canceled.", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(android.R.id.content), "'Progress task' canceled.", Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -80,6 +88,6 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
 
     @Override
     public void onDialogFragmentClick(DialogFragment fragment, int which) {
-        getTaskHandler().cancel(TASK_SIMPLE);
+        getTaskHandler().cancel(TASK_PROGRESS);
     }
 }
