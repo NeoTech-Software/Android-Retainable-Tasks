@@ -99,15 +99,15 @@ public void onStart(){
 
 ## 2. How it works
 ---
-**Retaining tasks**
+####**Retaining tasks**
 Tasks retained using the described method are stored in a *"no-ui-fragment"* this fragment retained across configuration changes and is added to your Activity's `FragmentManager` the first time you call `TaskHandler.getActivityTaskHandler()`. This fragment is from that point on bound to the Activity's life-cycle and holds an internal `TaskHandler`. The fragment makes sure that the internal `TaskHandler` removes all `Callback` listeners as soon as the Activity is stopping (`onStop()`).
 
-**Task without callback finishes**
+####**Task without callback finishes**
 When a Task doesn't have a `Callback` listener to deliver it's results to it will skip the delivery and redeliver the results as soon as a new listener is attached. If you call the `TaskHandler.attachListener()` method in the `onStart()` method, then the listener will be fired and you need to be sure that the user-interface is ready.
 
 Only the `onPostExecute()` and `onCanceled()` methods will be redelivered, other methodes won't be redelivered.
 
-**Task and Callback life-cycle**
+####**Task and Callback life-cycle**
 A `Task` basically has four life-cycle methods:
 
 * `onPreExecute()` *[ui-thread]*
@@ -122,10 +122,10 @@ A `Callback` listener has the same life-cycle methods as the`Task` and reflects 
 ---
 Besides the basics there are some more advanced API's you will probably need.
 
-**Getting task results**
+####**Getting task results**
 Unlike the default Android `AsyncTask` implementation you don't get `Task` results as a parameter, instead you will need to call the `Task.getResult()` method, which returns the tasks result.
 
-**Getting the tasks current state**
+####**Getting the tasks current state**
 The Android `AsyncTask` API provides the `AsyncTask.getStatus()` method which returns an enum value which can be used to determinate the tasks current state. Instead of using that method combined with an enum you can use on of the following methods:
 
 * `isFinished()`
@@ -134,13 +134,13 @@ The Android `AsyncTask` API provides the `AsyncTask.getStatus()` method which re
 * `isResultDelivered()`
 * `isCanceled()`
 
-**Getting the tasks last progress update**
+####**Getting the tasks last progress update**
 To get the tasks most recent progress update use the `getLastKnownProgress()` method.
 
-**AdvancedCallback**
+####**AdvancedCallback**
 If you need the `onProgressUpdated` and `onCanceled` callback methods you can implement the `AdvancedCallback` interface, which is an extension of the `Callback` interface.
 
-**TaskExecutor & Executor**
+####**TaskExecutor & Executor**
 You can also execute tasks without using a `TaskHandler` this means that you are responsible for removing and setting the `Callback` listener. Executing tasks without using the `TaskHandler` is handy when you don't need to get any feedback to the Activity's user-interface.
 
 ```java
@@ -162,7 +162,8 @@ TaskExecutor.executeOnExecutor(new ExampleTask(), yourExecutor);
 
 ## 4. FAQ
 
-**Why does the Task class still have the onPostExecute and onPreExecute etc. methods?**
+####**Why does the Task class still have the onPostExecute and onPreExecute etc. methods?**
+
 Although the `Callback` interface provides these methods sometimes you don't need any callback to the Activity's user-interface, at that moment the Task methods come in handy.
 ```java
 private class VerySimpleTask extends Task<Void, Boolean> {
