@@ -1,5 +1,5 @@
 # Android-Retainable-Tasks
-Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android `AsyncTask` implementation but with support for retaining tasks and therefor surviving configuration changes (orientation).
+Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android `AsyncTask` implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).
 
 1. [Basic usage](#1-basic-usage)
 2. [How it works](#2-how-it-works)
