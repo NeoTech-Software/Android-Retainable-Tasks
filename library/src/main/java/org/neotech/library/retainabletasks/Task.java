@@ -431,7 +431,7 @@ public abstract class Task<Progress, Result> {
      * @see #doInBackground
      */
     @MainThread
-    protected final void onProgressUpdate(Progress values) {
+    protected void onProgressUpdate(Progress values) {
     }
 
     @MainThread

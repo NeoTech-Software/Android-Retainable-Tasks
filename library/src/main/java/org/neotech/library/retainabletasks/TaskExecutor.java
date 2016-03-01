@@ -114,23 +114,23 @@ public class TaskExecutor {
      * @see Task#executeOnExecutor(java.util.concurrent.Executor)
      */
     @MainThread
-    private <Progress, Result> Task<Progress, Result> executeOnExecutor(Task<Progress, Result> task, Executor executor) {
+    public static <Progress, Result> Task<Progress, Result> executeOnExecutor(Task<Progress, Result> task, Executor executor) {
         return task.executeOnExecutor(executor);
     }
 
     @MainThread
     public static <Progress, Result> Task<Progress, Result> execute(Task<Progress, Result> task) {
-        return getInstance().executeOnExecutor(task, sDefaultExecutor);
+        return executeOnExecutor(task, sDefaultExecutor);
     }
 
     @MainThread
     public static <Progress, Result> Task<Progress, Result> executeSerial(Task<Progress, Result> task) {
-        return getInstance().executeOnExecutor(task, SERIAL_EXECUTOR);
+        return executeOnExecutor(task, SERIAL_EXECUTOR);
     }
 
 
     @MainThread
     public static <Progress, Result> Task<Progress, Result> executeParallel(Task<Progress, Result> task) {
-        return getInstance().executeOnExecutor(task, THREAD_POOL_EXECUTOR);
+        return executeOnExecutor(task, THREAD_POOL_EXECUTOR);
     }
 }
