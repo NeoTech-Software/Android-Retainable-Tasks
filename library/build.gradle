@@ -1,5 +1,50 @@
 apply plugin: 'com.android.library'
 
+ext {
+
+
+    /** JCenter/maven upload variables **/
+
+    /**
+     * Upload the library using:
+     * > gradlew install
+     * > gradlew bintrayUpload
+     */
+
+    // Where you will see your artifact in Bintray's web interface
+    // The "bintrayName" should match the name of the Bintray repro.
+    bintrayRepo = 'maven'
+    bintrayName = 'android-retainable-tasks'
+
+    // Maven metadata
+    publishedGroupId = 'org.neotech.library'
+    libraryName = 'Android-Retainable-Tasks'
+    // Save yourself a head ache, and set this equal to the name of the Android Studio library
+    // module. The artifact name needs to match the name of the library.
+    artifact = 'android-retainable-tasks'
+
+    libraryDescription = 'Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android AsyncTask implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).'
+    libraryVersion = '0.1.0'
+
+    siteUrl = 'https://github.com/Rolf-Smit/Android-Retainable-Tasks'
+    gitUrl = 'https://github.com/Rolf-Smit/Android-Retainable-Tasks.git'
+
+    developerId = 'rolf-smit'
+    developerName = 'Rolf Smit'
+    developerEmail = 'rolf@neotechsoftware.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+
+
+}
+
+/**
+ * Without this line the Bintray upload will fail as it uses the libraries directory name as artifactId
+ */
+archivesBaseName = 'android-retainable-tasks'
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -8,7 +53,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "${libraryVersion}"
     }
     buildTypes {
         release {
@@ -18,8 +63,17 @@ android {
     }
 }
 
+configurations {
+    javadocCompile
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.0'
+    javadocCompile 'com.android.support:appcompat-v7:23.2.0'
 }
+
+
+apply from: 'bintray-install.gradle'
+apply from: 'bintray-upload.gradle'

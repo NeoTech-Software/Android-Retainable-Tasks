@@ -39,15 +39,13 @@ public abstract class TaskHandler {
 
     /**
      * Returns the global TaskHandler. The global TaskHandler isn't bound to the lifecycle of an
-     * Activity and won't automatically remove
-     * {@link org.neotech.library.retainabletasks.Task.Callback} set to
-     * {@link android.support.v4.app.NotificationManagerCompat.Task Tasks} which are executed
-     * trough this TaskHandler. You should be aware of this behaviour and remove any callback, which
-     * might leak an Activity, Fragment, View etc., yourself. Good use cases for the global
-     * TaskHandler are Tasks which don't necessarily need to update the UI. But in most cases you
-     * really want to use the Activity TaskHandler.
+     * Activity and won't automatically remove a {@link Task.Callback} listeners set to
+     * {@link Task Tasks} which are executed trough this TaskHandler. You should be aware of this
+     * behaviour and remove any callback listeners to avoid leaking an Activity, Fragment, View etc.
+     * Good use cases for the global TaskHandler are Tasks which don't necessarily need to update
+     * the UI. But in most cases you really want to use the Activity TaskHandler.
      * @return The global TaskHandler instance.
-     * @see #getActivityTaskHandler(FragmentManager)
+     * @see TaskHandler#getActivityTaskHandler(FragmentManager)
      */
     public static TaskHandler getGlobalTaskHandler(){
         /**

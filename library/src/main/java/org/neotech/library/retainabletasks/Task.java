@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <pre class="prettyprint">
  * private class ExampleTask extends Task&lt;Integer, String&gt; {
  *     protected String doInBackground() {
- *         for(int i = 0; i < 100; i++) {
+ *         for(int i = 0; i &lt; 100; i++) {
  *              if(isCancelled()){
  *                  break;
  *              }
@@ -95,11 +95,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *         getTaskHandler().execute(task, this);
  *     }
  *
- *     public void onPreExecute(Task<?, ?> task) {
+ *     public void onPreExecute(Task&lt;?, ?&gt; task) {
  *         //Task started
  *     }
  *
- *     public void onPostExecute(Task<?, ?> task) {
+ *     public void onPostExecute(Task&lt;?, ?&gt; task) {
  *         //Task finished
  *         Toast.makeText(this, "Task finished", Toast.LENGTH_SHORT).show();
  *     }
