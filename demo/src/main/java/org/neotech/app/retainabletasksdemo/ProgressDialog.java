@@ -1,5 +1,6 @@
 package org.neotech.app.retainabletasksdemo;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -45,13 +46,15 @@ public class ProgressDialog extends DialogFragment implements DialogInterface.On
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_progress, null, false);
+
         progressPercentage = (TextView) view.findViewById(R.id.progress_percentage);
         progressCount = (TextView) view.findViewById(R.id.progress_count);
         progressBar = (ProgressBar) view.findViewById(android.R.id.progress);
         progressBar.setMax(100);
         progressBar.setIndeterminate(false);
         builder.setView(view);
-        builder.setPositiveButton("Cancel", this);
+        builder.setTitle(R.string.dialog_progress_title);
+        builder.setPositiveButton(R.string.action_cancel, this);
         setCancelable(false);
         return builder.create();
     }
@@ -70,6 +73,7 @@ public class ProgressDialog extends DialogFragment implements DialogInterface.On
         outState.putInt("progress", progress);
     }
 
+    @SuppressLint("SetTextI18n")
     public void setProgress(int progress){
         if(getDialog() != null) {
             progressBar.setProgress(progress);

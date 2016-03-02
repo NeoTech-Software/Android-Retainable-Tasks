@@ -22,13 +22,13 @@
             android:id="@+id/button_no_ui_task"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Task without UI callback" />
+            android:text="@string/task_no_ui_callback" />
 
         <Button
             android:id="@+id/button_progress_task"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Progress Task" />
+            android:text="@string/task_progress_dialog" />
 
     </LinearLayout>
 </ScrollView>

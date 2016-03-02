@@ -1,5 +1,7 @@
 package org.neotech.app.retainabletasksdemo;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -29,7 +31,6 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         findViewById(R.id.fab).setOnClickListener(this);
-
         findViewById(R.id.button_no_ui_task).setOnClickListener(this);
         findViewById(R.id.button_progress_task).setOnClickListener(this);
     }
@@ -45,10 +46,10 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
     public void onClick(View v) {
         final int id = v.getId();
         if(id == R.id.fab){
-            //TODO info
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NeoTech-Software/Android-Retainable-Tasks")));
         } else if(id == R.id.button_progress_task) {
             if (getTaskHandler().isRunning(TASK_PROGRESS)) {
-                Toast.makeText(this, "Task already running.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.toast_task_already_running, Toast.LENGTH_SHORT).show();
             }
             SimpleTask task = new SimpleTask(TASK_PROGRESS);
             getTaskHandler().execute(task, this);
@@ -72,13 +73,13 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
     @Override
     public void onPostExecute(Task<?, ?> task) {
         progressDialog.dismiss();
-        Snackbar.make(findViewById(android.R.id.content), "'Progress task' finished.", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(android.R.id.content), getString(R.string.toast_task_finished, getString(R.string.task_progress_dialog)), Snackbar.LENGTH_LONG).show();
     }
 
     @Override
     public void onCanceled(Task<?, ?> task) {
         progressDialog.dismiss();
-        Snackbar.make(findViewById(android.R.id.content), "'Progress task' canceled.", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(android.R.id.content), getString(R.string.toast_task_canceled, getString(R.string.task_progress_dialog)), Snackbar.LENGTH_LONG).show();
     }
 
     @Override

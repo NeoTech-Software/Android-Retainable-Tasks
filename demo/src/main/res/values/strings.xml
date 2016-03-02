@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Retainable Tasks Demo</string>
-    <string name="action_settings">Settings</string>
+
+    <string name="toast_task_already_running">Task already running.</string>
+    <string name="toast_task_finished">\'%1$s\' finished.</string>
+    <string name="toast_task_canceled">\'%1$s\' finished.</string>
+
+
+    <string name="task_no_ui_callback">Task without UI callback</string>
+    <string name="task_progress_dialog">Progress dialog task</string>
+    <string name="dialog_progress_title">Loading…</string>
+    <string name="action_cancel">Cancel</string>
 </resources>
