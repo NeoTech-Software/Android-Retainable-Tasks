@@ -15,9 +15,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url 'https://dl.bintray.com/rolf-smit/maven'
-        }
         jcenter()
     }
 }

@@ -1,4 +1,6 @@
 # Android-Retainable-Tasks
+[ ![Download](https://api.bintray.com/packages/rolf-smit/maven/android-retainable-tasks/images/download.svg) ](https://bintray.com/rolf-smit/maven/android-retainable-tasks/_latestVersion)
+
 Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android `AsyncTask` implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).
 
 **Add it to your project**
