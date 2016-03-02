@@ -18,12 +18,12 @@ ext {
     libraryDescription = 'Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android AsyncTask implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).'
     libraryVersion = '0.1.0'
 
-    siteUrl = 'https://github.com/Rolf-Smit/Android-Retainable-Tasks'
-    gitUrl = 'https://github.com/Rolf-Smit/Android-Retainable-Tasks.git'
+    siteUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks'
+    gitUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks.git'
 
     developerId = 'rolf-smit'
     developerName = 'Rolf Smit'
-    developerEmail = 'rolf@neotechsoftware.com'
+    developerEmail = 'contact@neotechsoftware.com'
 
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
