@@ -43,30 +43,6 @@ public class Main extends TaskActivity implements View.OnClickListener, Task.Adv
         retainUserInterfaceButton.setOnClickListener(this);
     }
 
-/*
-    @Override
-    protected void onStart() {
-        super.onStart();
-        progressDialog = ProgressDialog.getExistingInstance(getSupportFragmentManager(), DIALOG_PROGRESS);
-    }
-
-        getTaskManager().attach(TASK_PROGRESS, this);
-
-
-        getTaskManager().attach(TASK_RETAIN_UI_STATE, new TaskManager.TaskAttachListener() {
-            @Override
-            public Task.Callback onPreAttach(Task<?, ?> task) {
-
-                if (!task.isResultDelivered()) { //This call isn't necessary.
-                    retainUserInterfaceButton.setEnabled(false);
-                    retainUserInterfaceButton.setText("" + task.getLastKnownProgress());
-                }
-                return Main.this;
-            }
-        });
-    }
-    */
-
     @Override
     public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
         if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
