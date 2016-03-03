@@ -3,13 +3,27 @@
 
     <string name="toast_task_already_running">Task already running.</string>
     <string name="toast_task_finished">\'%1$s\' finished.</string>
-    <string name="toast_task_canceled">\'%1$s\' finished.</string>
+    <string name="toast_task_canceled">\'%1$s\' canceled.</string>
 
 
+    <string name="task_fragment_based">Start fragment based task</string>
     <string name="task_no_ui_callback">Task without UI callback</string>
     <string name="task_progress_dialog">Progress dialog task</string>
     <string name="task_retain_ui_state">Retain UI state task</string>
 
     <string name="dialog_progress_title">Loading…</string>
     <string name="action_cancel">Cancel</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="text_open_fragment_activty">Open fragment test activity</string>
+
+    <string name="text_fragment_task_manager_explanation">"This Activity has three Fragments, each Fragment extends the TaskFragment and has its own TaskManager instance.
+
+        When you select another Fragment using the left drawer the current fragment will be detached, this means that any Task started using the Fragments TaskManger will only deliver its result when the Fragment is attached to the Activity again.
+
+        Try it out! First press the button to start a new Task then select another Fragment.
+        "</string>
+
 </resources>

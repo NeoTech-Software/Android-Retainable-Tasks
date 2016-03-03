@@ -1,8 +1,14 @@
-package org.neotech.library.retainabletasks;
+package org.neotech.library.retainabletasks.internal;
 
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+
+import org.neotech.library.retainabletasks.Task;
+import org.neotech.library.retainabletasks.TaskExecutor;
+import org.neotech.library.retainabletasks.TaskManager;
+import org.neotech.library.retainabletasks.TaskManagerProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,33 +27,77 @@ public class BaseTaskManager extends TaskManager {
         return tasks.get(tag);
     }
 
+    public void attach(TaskManagerProvider taskManagerProvider){
+        for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
+            Task.Callback callback = taskManagerProvider.onPreAttach(task.getValue());
+            if(callback == null){
+                throw new IllegalArgumentException("Could not attach Task '" + task.getKey() + "' because onPreAttach did not return a valid Callback listener! Did you override onPreAttach()?");
+            }
+            attach(task.getValue(), new CallbackShadow(callback));
+        }
+    }
+
     @Override
     @MainThread
-    public Task<?, ?> attachListener(@NonNull String tag, @NonNull Task.Callback callback){
+    public Task<?, ?> attach(@NonNull String tag, @NonNull Task.Callback callback){
         final Task<?, ?> task = tasks.get(tag);
         if(task == null){
             return null;
         }
+        return attach(task, callback);
+    }
+
+    @Override
+    @MainThread
+    public Task<?, ?> attach(@NonNull String tag, @NonNull TaskAttachListener listener){
+        final Task<?, ?> task = tasks.get(tag);
+        if(task == null){
+            return null;
+        }
+        return attach(task, listener.onPreAttach(task));
+    }
+
+    @Override
+    public Task<?, ?> attach(@NonNull Task<?, ?> task, @NonNull Task.Callback callback) {
+        logCallback(callback);
         task.setCallback(new CallbackShadow(callback));
         return task;
     }
 
     @Override
-    @MainThread
-    public Task<?, ?> attachListener(@NonNull String tag, @NonNull TaskAttachListener listener){
-        final Task<?, ?> task = tasks.get(tag);
-        if(task == null){
-            return null;
+    public void attachAll(@NonNull Task.Callback callback, @NonNull String... tags) {
+        for(String tag: tags){
+            attach(tag, callback);
         }
-        task.setCallback(new CallbackShadow(listener.onPreAttach(task)));
+    }
+
+    @Override
+    public void attachAll(@NonNull TaskAttachListener attachListener, @NonNull String... tags) {
+        for(String tag: tags){
+            attach(tag, attachListener);
+        }
+    }
+
+    @Override
+    public Task<?, ?> detach(@NonNull String tag) {
+        final Task<?, ?> task = tasks.get(tag);
+        if(task != null){
+            task.removeCallback();
+        }
         return task;
     }
 
     @Override
-    @MainThread
-    public Task<?, ?> attachListener(@NonNull Task<?, ?> task, @NonNull Task.Callback callback) {
-        task.setCallback(new CallbackShadow(callback));
-        return task;
+    public void detachAll(@NonNull String... tags) {
+        for(String tag: tags){
+            detach(tag);
+        }
+    }
+
+    private void logCallback(final Task.Callback callback){
+        if(callback instanceof Fragment || callback instanceof android.app.Fragment){
+            Log.i(TAG, "Important: Found attached Callback which is an instance of Fragment. If your Fragment doesn't follow the activity lifecycle make sure to detach the task in Fragment.onStop()!");
+        }
     }
 
     @Override
@@ -95,7 +145,7 @@ public class BaseTaskManager extends TaskManager {
     }
 
     @MainThread
-    void detachListeners(){
+    public void detach(){
         for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
             task.getValue().removeCallback();
         }
@@ -110,7 +160,7 @@ public class BaseTaskManager extends TaskManager {
         tasks.remove(expectedTask.getTag());
     }
 
-    private final class CallbackShadow implements Task.AdvancedCallback  {
+    protected final class CallbackShadow implements Task.AdvancedCallback  {
 
         private final Task.Callback callback;
 
