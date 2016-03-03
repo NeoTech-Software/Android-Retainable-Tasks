@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>Differences:</p>
  * <ul>
  *     <li>A callback listener can be added to and removed from a Task;</li>
- *     <li>Tasks can be retained and executed using a {@link TaskHandler};</li>
+ *     <li>Tasks can be retained and executed using a {@link TaskManager};</li>
  *     <li>No {@link AsyncTask#getStatus()} method use {@link #isReady()}, {@link #isRunning()},
  *     {@link #isFinished()} etc. methods;</li>
  *     <li>Tasks are executed using a {@link TaskExecutor};</li>
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *     <li>No Result method parameter, you should use the {@link #getResult()} method;</li>
  *     <li>Any callback listener which is an instance of an Activity, Fragment, View etc. needs to
  *     be removed and re-added when the application changes configuration. Otherwise the Task leaks
- *     those components, most of this process is automatic if you use a {@link TaskHandler};</li>
+ *     those components, most of this process is automatic if you use a {@link TaskManager};</li>
  *     <li>{@link #publishProgress(Object)} takes a single unit as parameter instead of multiple;</li>
  * </ul>
  *
@@ -68,7 +68,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </pre>
  *
  * <p>The problem is that you don't get any feedback for the user interface when executing tasks
- * like this. The preferred way is to use a TaskHandler which is loosely coupled to the Activity
+ * like this. The preferred way is to use a TaskManager which is loosely coupled to the Activity
  * lifecycle using a internal Fragment which is retained accros configuration changes.</p>
  *
  * <pre class="prettyprint">
@@ -78,21 +78,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  *     //... onCreate etc.
  *
- *     public TaskHandler getTaskHandler(){
- *         return TaskHandler.getActivityTaskHandler(getSupportFragmentManager());
+ *     public TaskManager getTaskManager(){
+ *         return TaskManager.getActivityTaskManager(getSupportFragmentManager());
  *     }
  *
  *     protected void onStart() {
  *         super.onStart();
  *         //Attach this activity as listener for the Task identified by tag TASK_DEMO
- *         getTaskHandler().attachListener(TASK_DEMO, this);
+ *         getTaskManager().attachListener(TASK_DEMO, this);
  *     }
  *
  *     public void onClick(View v) {
- *         //Create a new task and execute it through the TaskHandler,
+ *         //Create a new task and execute it through the TaskManager,
  *         //making this activity instance the tasks listener.
  *         ExampleTask task = new ExampleTask(TASK_DEMO);
- *         getTaskHandler().execute(task, this);
+ *         getTaskManager().execute(task, this);
  *     }
  *
  *     public void onPreExecute(Task&lt;?, ?&gt; task) {
@@ -231,8 +231,8 @@ public abstract class Task<Progress, Result> {
      * Creates a new Task. This constructor must be invoked on the UI thread.
      * @param tag A unique tag, which is used for retaining and identifying tasks across
      *            configuration changes. The tag needs to be unique on Activity level if you use
-     *            an Activity bounded TaskHandler to execute this task. If you use an Application
-     *            bounded TaskHandler the tag needs to be unique across the complete Application.
+     *            an Activity bounded TaskManager to execute this task. If you use an Application
+     *            bounded TaskManager the tag needs to be unique across the complete Application.
      */
     @MainThread
     public Task(String tag) {
@@ -355,7 +355,7 @@ public abstract class Task<Progress, Result> {
          * It's arguable that an exception should be thrown in this case, because even if the task
          * did start, it might never have published any progress.
          */
-        if(!isReady()){
+        if(isReady()){
             throw new IllegalStateException("Progress not available because the task did not start execution.");
         }
         return lastProgress;

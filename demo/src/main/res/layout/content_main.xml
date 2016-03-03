@@ -30,5 +30,11 @@
             android:layout_width="wrap_content"
             android:text="@string/task_progress_dialog" />
 
+        <Button
+            android:id="@+id/button_retain_ui_state_task"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/task_retain_ui_state" />
+
     </LinearLayout>
 </ScrollView>

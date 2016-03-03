@@ -9,9 +9,9 @@ import android.support.v4.app.FragmentManager;
  */
 public class TaskFragment extends Fragment {
 
-    private final BaseTaskHandler taskHandler = new BaseTaskHandler();
+    private final BaseTaskManager taskManager = new BaseTaskManager();
 
-    public static TaskHandler getInstance(FragmentManager fragmentManager){
+    public static TaskManager getInstance(FragmentManager fragmentManager){
         TaskFragment taskFragment = (TaskFragment) fragmentManager.findFragmentByTag("TaskFragment");
         if(taskFragment == null){
             taskFragment = new TaskFragment();
@@ -19,7 +19,7 @@ public class TaskFragment extends Fragment {
         if(!taskFragment.isAdded()) {
             fragmentManager.beginTransaction().add(taskFragment, "TaskFragment").commit();
         }
-        return taskFragment.taskHandler;
+        return taskFragment.taskManager;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class TaskFragment extends Fragment {
     public void onStop() {
         super.onStop();
         //As soon as the activity is stopped the UI should not be touched.
-        taskHandler.detachListeners();
+        taskManager.detachListeners();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TaskFragment extends Fragment {
          * The references to the tasks are lost at this point.
          */
 
-        taskHandler.detachListeners();
+        taskManager.detachListeners();
         super.onDestroy();
     }
 }

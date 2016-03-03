@@ -10,9 +10,9 @@ import java.util.Map;
 /**
  * Created by Rolf on 29-2-2016.
  */
-public class BaseTaskHandler extends TaskHandler {
+public class BaseTaskManager extends TaskManager {
 
-    private static final String TAG = "SimpleTaskHandler";
+    private static final String TAG = "SimpleTaskManager";
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
 
@@ -24,7 +24,7 @@ public class BaseTaskHandler extends TaskHandler {
     @Override
     @MainThread
     public Task<?, ?> attachListener(@NonNull String tag, @NonNull Task.Callback callback){
-        Task<?, ?> task = tasks.get(tag);
+        final Task<?, ?> task = tasks.get(tag);
         if(task == null){
             return null;
         }
@@ -34,8 +34,27 @@ public class BaseTaskHandler extends TaskHandler {
 
     @Override
     @MainThread
+    public Task<?, ?> attachListener(@NonNull String tag, @NonNull TaskAttachListener listener){
+        final Task<?, ?> task = tasks.get(tag);
+        if(task == null){
+            return null;
+        }
+        task.setCallback(new CallbackShadow(listener.onPreAttach(task)));
+        return task;
+    }
+
+    @Override
+    @MainThread
+    public Task<?, ?> attachListener(@NonNull Task<?, ?> task, @NonNull Task.Callback callback) {
+        task.setCallback(new CallbackShadow(callback));
+        return task;
+    }
+
+    @Override
+    @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback){
-        if(tasks.get(task.getTag()) != null){
+        final Task currentTask = tasks.get(task.getTag());
+        if(currentTask != null && currentTask.isRunning()){
             throw new IllegalStateException("Task with an equal tag: '" + task.getTag() + "' has already been added and is currently running or finishing.");
         }
         tasks.put(task.getTag(), task);
@@ -45,10 +64,18 @@ public class BaseTaskHandler extends TaskHandler {
 
     @Override
     @MainThread
-    public boolean isRunning(String tag) {
+    public boolean isResultDelivered(@NonNull String tag) {
+        Task task = tasks.get(tag);
+        return task != null && task.isResultDelivered();
+    }
+
+    @Override
+    @MainThread
+    public boolean isRunning(@NonNull String tag) {
         Task task = tasks.get(tag);
         return task != null && task.isRunning();
     }
+
 
     @Override
     @MainThread

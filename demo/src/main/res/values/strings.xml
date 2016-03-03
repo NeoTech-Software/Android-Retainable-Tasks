@@ -8,6 +8,8 @@
 
     <string name="task_no_ui_callback">Task without UI callback</string>
     <string name="task_progress_dialog">Progress dialog task</string>
+    <string name="task_retain_ui_state">Retain UI state task</string>
+
     <string name="dialog_progress_title">Loading…</string>
     <string name="action_cancel">Cancel</string>
 </resources>
