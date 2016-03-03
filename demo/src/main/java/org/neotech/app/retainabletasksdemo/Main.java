@@ -48,10 +48,10 @@ public class Main extends AppCompatActivity implements View.OnClickListener, Tas
     protected void onStart() {
         super.onStart();
         progressDialog = ProgressDialog.getExistingInstance(getSupportFragmentManager(), DIALOG_PROGRESS);
-        getTaskManager().attachListener(TASK_PROGRESS, this);
+        getTaskManager().attach(TASK_PROGRESS, this);
 
 
-        getTaskManager().attachListener(TASK_RETAIN_UI_STATE, new TaskManager.TaskAttachListener() {
+        getTaskManager().attach(TASK_RETAIN_UI_STATE, new TaskManager.TaskAttachListener() {
             @Override
             public Task.Callback onPreAttach(Task<?, ?> task) {
                 /**

@@ -2,6 +2,7 @@ package org.neotech.library.retainabletasks;
 
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
 /**
@@ -37,14 +38,27 @@ public abstract class TaskManager {
     @MainThread
     public abstract Task<?, ?> getTask(@NonNull String tag);
 
-    @MainThread
-    public abstract Task<?, ?> attachListener(@NonNull String tag, @NonNull Task.Callback callback);
 
     @MainThread
-    public abstract Task<?, ?> attachListener(@NonNull String tag, @NonNull TaskAttachListener attachListener);
+    public abstract Task<?, ?> attach(@NonNull String tag, @NonNull Task.Callback callback);
 
     @MainThread
-    public abstract Task<?, ?> attachListener(@NonNull Task<?, ?> task, @NonNull Task.Callback callback);
+    public abstract Task<?, ?> attach(@NonNull String tag, @NonNull TaskAttachListener attachListener);
+
+    @MainThread
+    public abstract Task<?, ?> attach(@NonNull Task<?, ?> task, @NonNull Task.Callback callback);
+
+    @MainThread
+    public abstract void attachAll(@NonNull Task.Callback callback, @NonNull String... tags);
+
+    @MainThread
+    public abstract void attachAll(@NonNull TaskAttachListener attachListener, @NonNull String... tags);
+
+    @MainThread
+    public abstract Task<?, ?> detach(@NonNull String tag);
+
+    @MainThread
+    public abstract void detachAll(@NonNull String... tags);
 
     @MainThread
     public abstract Task<?, ?> cancel(@NonNull String tag);
