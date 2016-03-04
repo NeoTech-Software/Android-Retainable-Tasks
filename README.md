@@ -41,12 +41,12 @@ dependencies {
 
 ## 1. Basic usage
 ---
-In order to, execute a task which modifies the user-interface and to retain it across configuration changes you will need to do three things:
+In order to, execute a task which modifies the user-interface and to retain it across configuration changes you will need to do four things:
 
 1. Create an implementation of the `Task` class;
 2. Make your Activity extend the `TaskActivityCompat` class (or for Fragments the `TaskFragmentCompat` class);
 3. Implement the `Callback` interface somewhere and execute the task using the `TaskManager`;
-
+4. Retain the task using the `TaskActivityCompat.onPreAttach()` method.
 
 ### 1.1 Creating the task
 
