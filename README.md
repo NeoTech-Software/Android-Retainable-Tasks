@@ -37,7 +37,7 @@ dependencies {
 In order to, execute a task which modifies the user-interface and to retain it across configuration changes you will need to do three things:
 
 1. Create an implementation of the `Task` class;
-2. Make your Activity extend the `TaskActivity` class (or for Fragments the `TaskFragment` class);
+2. Make your Activity extend the `TaskActivityCompat` class (or for Fragments the `TaskFragmentCompat` class);
 3. Implement the `Callback` interface somewhere and execute the task using the `TaskManager`;
 
 
@@ -70,20 +70,20 @@ private class ExampleTask extends Task<Integer, String> {
 }
 ```
 
-### 1.2 Extending from the TaskActivity class
-The `TaskActivity` class is the most easy way to use this library, make sure your Activity extends from it and it wil take care of retaining all `Tasks` started by the Activity's `TaskManager`.
+### 1.2 Extending from the TaskActivityCompat class
+The `TaskActivityCompat` class is the most easy way to use this library, make sure your Activity extends from it and it wil take care of retaining all `Tasks` started by the Activity's `TaskManager`.
 
 ```java
-public class Main extends TaskActivity {
+public class Main extends TaskActivityCompat {
 
 }
 ```
 
 >**Help, I already extend some custom Activity implementation!** 
->Don't worry, you can easily add the `TaskActivity` behaviour to any Activity or Fragment by using the `TaskManagerLifeCycleProxy` class . Check out [this sample](#using-the-taskmanagerlifecycleproxy-to-mimic-the-taskactivity).
+>Don't worry, you can easily add the `TaskActivityCompat` behaviour to any Activity or Fragment by using the `TaskManagerLifeCycleProxy` class . Check out [this sample](#using-the-taskmanagerlifecycleproxy-to-mimic-the-taskactivity).
 
 ### 1.3 Execute the Task and receive callback
-Before you can execute the `ExampleTask` you first need to get the current Activity's `TaskManager`. A `TaskManager` keeps references to tasks and executes them. You can obtain the current Activity's `TaskManager` using the `TaskActivity.getTaskManager()` method.
+Before you can execute the `ExampleTask` you first need to get the current Activity's `TaskManager`. A `TaskManager` keeps references to tasks and executes them. You can obtain the current Activity's `TaskManager` using the `TaskActivityCompat.getTaskManager()` method.
 
 Then you can execute the task using the `TaskManager.execute()` method. This method needs two arguments, the task to execute and a `Callback` listener to send feedback to. Preferably your activity implements the `Callback` interface, but this isn't necessarily needed. The `TaskManager` currently always executes tasks in parallel *(work in progress to make it a option)*.
 
@@ -112,7 +112,7 @@ public class Main extends AppCompatActivity implements Task.Callback {
 
 
 >**Tip:**
->You can also make your Fragment extend the `TaskFragment` class and use a Fragment to execute and retain your task in. It works exactly the same, but keep in mind that the `Callback` listeners are removed as soon as the Fragments stops (`onStop()`). 
+>You can also make your Fragment extend the `TaskFragmentCompat` class and use a Fragment to execute and retain your task in. It works exactly the same, but keep in mind that the `Callback` listeners are removed as soon as the Fragments stops (`onStop()`). 
 
 
 ### 1.4 Retaining the task
@@ -121,7 +121,7 @@ When the configuration changes (device rotates) the `TaskManager` will automatic
 > **In-depth:**
 > The `TaskManger` (or actually a internal class) will detect when the Activity stops (`onStop()`). and will automatically remove all `Callback` listeners when this happens. At this moment the user-interface has become *"unstable"*,  this means that some user-interface functionality stops working. For example, the `FragmentManager` refuses at this point to add new Fragments because the Activity's `onSaveInstanceState()` method already has been called. If the `Callback` listener is not removed by the `TaskManager` before this point, then a `DialogFragment.show()` call will throw an exception when called in the `onPostExecute()` method. This is why the `Callback` listeners are removed when the Activity stops.
 
-Although tasks are automatically retained, you will still need to provide a new `Callback` listener for each `Task`. You can easily do this by implementing (overriding) the `TaskActivity` (or `TaskFragment`) `onPreAttachTask(Task)` method and return a `Callback` instance. At this point you can also use the `onPreAttachTask(Task)` method to restore the user-interface state according to the `Tasks` state. The `onPreAttachTask(Task)` method will be called for each task that isn't finished (didn't deliver).
+Although tasks are automatically retained, you will still need to provide a new `Callback` listener for each `Task`. You can easily do this by implementing (overriding) the `TaskActivityCompat` (or `TaskFragmentCompat`) `onPreAttachTask(Task)` method and return a `Callback` instance. At this point you can also use the `onPreAttachTask(Task)` method to restore the user-interface state according to the `Tasks` state. The `onPreAttachTask(Task)` method will be called for each task that isn't finished (didn't deliver).
 
 ```java
 public class Main extends AppCompatActivity implements Task.Callback {
@@ -140,8 +140,8 @@ public class Main extends AppCompatActivity implements Task.Callback {
 ####**How are tasks retained?**
 Tasks are are stored in `FragmentManagers` which are stored in a *"no-ui-fragment"* this fragment retained across configuration changes and is added to your Activity's `FragmentManager` the first time you call:
 
- - `TaskActivity.getTaskManager()`;
- - `TaskFragment.getTaskManager()`;
+ - `TaskActivityCompat.getTaskManager()`;
+ - `TaskFragmentCompat.getTaskManager()`;
  - `TaskManager.getActivityTaskManager()` (super-advanced usage);
  - `TaskManager.getFragmentTaskManager()` (super-advanced usage);
 

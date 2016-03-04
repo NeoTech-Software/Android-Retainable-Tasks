@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import org.neotech.library.retainabletasks.TaskManager;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Rolf on 4-3-2016.
@@ -61,5 +62,18 @@ public final class TaskRetainingFragment {
 
     public BaseTaskManager getActivityTaskManager(){
         return taskManager;
+    }
+
+    public void assertAllRemoved(){
+        if(!TaskManager.isStrictDebugModeEnabled()){
+            return;
+        }
+        for(Map.Entry<String, TaskManager> entry: fragmentTaskManagers.entrySet()){
+            try {
+                entry.getValue().assertAllTasksDetached();
+            } catch(IllegalStateException e){
+                throw new IllegalStateException("", e);
+            }
+        }
     }
 }

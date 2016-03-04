@@ -531,11 +531,11 @@ public abstract class Task<Progress, Result> {
     }
 
     /**
-     * Returns the currently set callback listener..
+     * Returns the currently set callback listener.
      * @return The currently set callback listener.
      */
     @MainThread
-    Callback getCallback(){
+    public Callback getCallback(){
         return callback;
     }
 

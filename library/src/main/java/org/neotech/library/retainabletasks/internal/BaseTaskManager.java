@@ -2,7 +2,6 @@ package org.neotech.library.retainabletasks.internal;
 
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import org.neotech.library.retainabletasks.Task;
@@ -59,7 +58,6 @@ public final class BaseTaskManager extends TaskManager {
 
     @Override
     public Task<?, ?> attach(@NonNull Task<?, ?> task, @NonNull Task.Callback callback) {
-        logCallback(callback);
         task.setCallback(new CallbackShadow(callback));
         return task;
     }
@@ -91,12 +89,6 @@ public final class BaseTaskManager extends TaskManager {
     public void detachAll(@NonNull String... tags) {
         for(String tag: tags){
             detach(tag);
-        }
-    }
-
-    private void logCallback(final Task.Callback callback){
-        if(callback instanceof Fragment || callback instanceof android.app.Fragment){
-            Log.i(TAG, "Important: Found attached Callback which is an instance of Fragment. If your Fragment doesn't follow the activity lifecycle make sure to detach the task in Fragment.onStop()!");
         }
     }
 
@@ -137,6 +129,17 @@ public final class BaseTaskManager extends TaskManager {
         return task;
     }
 
+    @Override
+    @MainThread
+    public void assertAllTasksDetached() throws IllegalStateException {
+        for(Map.Entry<String, Task<?, ?>> entry: tasks.entrySet()){
+            final Task task = entry.getValue();
+            if(task.getCallback() != null){
+                throw new IllegalStateException("Task '" + task.getTag() + "' isn't detached and references a Callback listener: " + task.getCallback());
+            }
+        }
+    }
+
     @MainThread
     public void cancelAll(){
         for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
@@ -151,7 +154,6 @@ public final class BaseTaskManager extends TaskManager {
         }
     }
 
-    @MainThread
     private void removeFinishedTask(Task expectedTask){
         Task task = tasks.get(expectedTask.getTag());
         if(task != expectedTask){

@@ -78,8 +78,30 @@ public abstract class TaskManager {
     @MainThread
     public abstract boolean isRunning(@NonNull String tag);
 
-    private static volatile BaseTaskManager globalInstance;
+    @MainThread
+    public abstract void assertAllTasksDetached() throws IllegalStateException;
 
+    private static volatile BaseTaskManager globalInstance;
+    protected static volatile boolean strictDebug = false;
+
+    /**
+     * Enables or disables the strict debug mode. When this mode is enabled the TaskManager does
+     * some extra checking and throws exceptions if it detects faulty behaviour. You're encouraged
+     * to use this mode when testing your app. Strict mode is disabled by default.
+     * @param strictDebug true if the strict mode should be enabled, false if it should be disabled.
+     */
+    public static void setStrictDebugMode(boolean strictDebug){
+        TaskManager.strictDebug = strictDebug;
+    }
+
+    /**
+     * Returns whether the strict mode is enabled. By default the strict mode is disabled.
+     * @return true if strict mode is enabled, false if not.
+     * @see TaskManager#setStrictDebugMode(boolean)
+     */
+    public static boolean isStrictDebugModeEnabled(){
+        return strictDebug;
+    }
 
     /**
      * Returns the {@link TaskManager} associated with the given Fragment.
@@ -119,7 +141,6 @@ public abstract class TaskManager {
         }
         throw new IllegalArgumentException("In order to associate a TaskManger with a Fragment the Fragment needs to have a tag.");
     }
-
 
     /**
      * Returns the {@link TaskManager} associated with the Activity the given FragmentManger belongs to. You

@@ -11,12 +11,12 @@ import android.widget.Button;
 
 import org.neotech.app.retainabletasksdemo.tasks.CountDownTask;
 import org.neotech.library.retainabletasks.Task;
-import org.neotech.library.retainabletasks.TaskFragment;
+import org.neotech.library.retainabletasks.providers.TaskFragmentCompat;
 
 /**
  * Created by Rolf on 3-3-2016.
  */
-public class TestFragment extends TaskFragment implements View.OnClickListener, Task.AdvancedCallback {
+public class TestFragment extends TaskFragmentCompat implements View.OnClickListener, Task.AdvancedCallback {
 
     private Button button;
 

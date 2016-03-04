@@ -15,10 +15,10 @@ import org.neotech.app.retainabletasksdemo.tasks.CountDownTask;
 import org.neotech.app.retainabletasksdemo.tasks.SimpleTask;
 import org.neotech.app.retainabletasksdemo.tasks.TaskWithoutCallback;
 import org.neotech.library.retainabletasks.Task;
-import org.neotech.library.retainabletasks.TaskActivity;
+import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 import org.neotech.library.retainabletasks.TaskExecutor;
 
-public class Main extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback, OnAlertDialogClickListener {
+public class Main extends TaskActivityCompat implements View.OnClickListener, Task.AdvancedCallback, OnAlertDialogClickListener {
 
     private static final String TASK_RETAIN_UI_STATE = "retain-ui-state";
     private static final String TASK_PROGRESS = "progress-dialog";
@@ -35,6 +35,8 @@ public class Main extends TaskActivity implements View.OnClickListener, Task.Adv
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         findViewById(R.id.button_open_fragment_activity).setOnClickListener(this);
+        findViewById(R.id.button_open_v11_activity).setOnClickListener(this);
+
         findViewById(R.id.fab).setOnClickListener(this);
         findViewById(R.id.button_no_ui_task).setOnClickListener(this);
         findViewById(R.id.button_progress_task).setOnClickListener(this);
@@ -83,6 +85,8 @@ public class Main extends TaskActivity implements View.OnClickListener, Task.Adv
             retainUserInterfaceButton.setEnabled(false);
         } else if(id == R.id.button_open_fragment_activity){
             startActivity(new Intent(this, ActivityWithFragments.class));
+        } else if(id == R.id.button_open_v11_activity){
+            startActivity(new Intent(this, ActivityV11.class));
         }
     }
 

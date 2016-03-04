@@ -18,7 +18,7 @@ public final class TaskManagerLifeCycleProxy {
     private final TaskManagerProvider provider;
 
     public TaskManagerLifeCycleProxy(@NonNull TaskManagerProvider provider){
-        if(!(provider instanceof Activity || provider instanceof Fragment || provider instanceof android.app.Fragment)){
+        if(!(provider instanceof Activity || provider instanceof Fragment || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && provider instanceof android.app.Fragment))){
             throw new IllegalArgumentException("The TaskManagerProvider needs to be an instance of android.app.Activity (including the derived support library activities), android.app.Fragment or android.support.v4.app.Fragment!");
 
             /**
@@ -50,7 +50,7 @@ public final class TaskManagerLifeCycleProxy {
             fragmentTaskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((Fragment) provider);
         } else if(provider instanceof Activity){
             fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((Activity) provider).getFragmentManager());
-        } else if(provider instanceof android.app.Fragment){
+        } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && provider instanceof android.app.Fragment){
             fragmentTaskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((android.app.Fragment) provider);
         } /* else {
             //This should never happen as the constructor checks everything.

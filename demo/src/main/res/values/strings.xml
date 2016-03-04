@@ -17,7 +17,9 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="text_open_fragment_activty">Open fragment test activity</string>
+    <string name="text_open_fragment_activity">Start fragment test activity</string>
+    <string name="text_open_v11_activity">Start non-support library Activity</string>
+
 
     <string name="text_fragment_task_manager_explanation">"This Activity has three Fragments, each Fragment extends the TaskFragment and has its own TaskManager instance.
 

@@ -24,6 +24,7 @@ public final class TaskRetainingFragmentV11 extends Fragment {
         super.onStop();
         //As soon as the activity is stopped the UI should not be touched.
         logic.getActivityTaskManager().detach();
+        logic.assertAllRemoved();
     }
 
     @Override
