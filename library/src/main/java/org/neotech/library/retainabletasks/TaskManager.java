@@ -1,7 +1,10 @@
 package org.neotech.library.retainabletasks;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
@@ -85,8 +88,23 @@ public abstract class TaskManager {
      */
     @MainThread
     public static TaskManager getFragmentTaskManager(@NonNull Fragment fragment){
-        TaskRetainingFragment taskRetainingFragment = TaskRetainingFragment.getInstance(fragment.getFragmentManager());
-        final String tag = getFragmentTag(fragment);
+        final String tag = getTaskManagerTag(fragment.getTag());
+        return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+    }
+
+    /**
+     * Returns the {@link TaskManager} associated with the given Fragment.
+     * @param fragment The Fragment to get the TaskManager for.
+     * @return The TaskManager instance associated with the given Fragment.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @MainThread
+    public static TaskManager getFragmentTaskManager(@NonNull android.app.Fragment fragment){
+        final String tag = getTaskManagerTag(fragment.getTag());
+        return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+    }
+
+    private static TaskManager getTaskManager(@NonNull TaskRetainingFragment taskRetainingFragment, @NonNull String tag){
         BaseTaskManager manager = (BaseTaskManager) taskRetainingFragment.findTaskManagerByTag(tag);
         if(manager == null){
             manager = new BaseTaskManager();
@@ -95,9 +113,9 @@ public abstract class TaskManager {
         return manager;
     }
 
-    private static String getFragmentTag(@NonNull Fragment fragment) {
-        if (fragment.getTag() != null) {
-            return "tag:" + fragment.getTag();
+    private static String getTaskManagerTag(@Nullable String fragmentTag) {
+        if (fragmentTag != null) {
+            return "tag:" + fragmentTag;
         }
         throw new IllegalArgumentException("In order to associate a TaskManger with a Fragment the Fragment needs to have a tag.");
     }
@@ -111,6 +129,17 @@ public abstract class TaskManager {
      */
     @MainThread
     public static TaskManager getActivityTaskManager(@NonNull FragmentManager manager){
+        return TaskRetainingFragment.getInstance(manager).getActivityTaskManager();
+    }
+
+    /**
+     * Returns the {@link TaskManager} associated with the Activity the given FragmentManger belongs to. You
+     * should never try to supply a child/Fragment FragmentManger here.
+     * @param manager The FragmentManger of the Activity you would like to get the TaskManager for.
+     * @return The TaskManager instance associated with the given Activity's FragmentManger.
+     */
+    @MainThread
+    public static TaskManager getActivityTaskManager(@NonNull android.app.FragmentManager manager){
         return TaskRetainingFragment.getInstance(manager).getActivityTaskManager();
     }
 

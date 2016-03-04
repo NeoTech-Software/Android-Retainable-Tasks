@@ -16,9 +16,9 @@ import java.util.Map;
 /**
  * Created by Rolf on 29-2-2016.
  */
-public class BaseTaskManager extends TaskManager {
+public final class BaseTaskManager extends TaskManager {
 
-    private static final String TAG = "SimpleTaskManager";
+    private static final String TAG = "BaseTaskManager";
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
 
@@ -33,7 +33,7 @@ public class BaseTaskManager extends TaskManager {
             if(callback == null){
                 throw new IllegalArgumentException("Could not attach Task '" + task.getKey() + "' because onPreAttach did not return a valid Callback listener! Did you override onPreAttach()?");
             }
-            attach(task.getValue(), new CallbackShadow(callback));
+            attach(task.getValue(), callback);
         }
     }
 
@@ -155,12 +155,12 @@ public class BaseTaskManager extends TaskManager {
     private void removeFinishedTask(Task expectedTask){
         Task task = tasks.get(expectedTask.getTag());
         if(task != expectedTask){
-            Log.i(TAG, "Task '" + expectedTask.getTag() + "' has already been removed, because another task has been added while this task was finishing.");
+            Log.i(TAG, "Task '" + expectedTask.getTag() + "' has already been removed, because another task with the same tag has been added while this task was finishing.");
         }
         tasks.remove(expectedTask.getTag());
     }
 
-    protected final class CallbackShadow implements Task.AdvancedCallback  {
+    private final class CallbackShadow implements Task.AdvancedCallback  {
 
         private final Task.Callback callback;
 

@@ -459,8 +459,11 @@ public abstract class Task<Progress, Result> {
     private void doCancelled() {
         onCancelled();
         Callback callback = getCallback();
-        if (callback != null && callback instanceof AdvancedCallback) {
+        if (callback instanceof AdvancedCallback) {
+            shouldDeliverResult = false;
             ((AdvancedCallback) callback).onCanceled(this);
+        } else {
+            shouldDeliverResult = true;
         }
     }
 
