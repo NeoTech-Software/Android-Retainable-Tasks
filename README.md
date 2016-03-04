@@ -19,16 +19,25 @@ dependencies {
 2. [How it works](#2-how-it-works)
 3. [Advanced usage](#3-advanced-usage)
 4. [FAQ](#4-faq)
+5. [ToDo](#5-to-do)
+
+>**Why use this library?**
+
+>*Always! its awesome!!!*
+
+>This library is useful if you need to do stuff in the background which is heavily bound to the user-interface, like: Refreshing large lists from a database, loading an article from a network source or decoding an image. You need to use an additional library if you need: task scheduling, automatic retries, task persistence across reboots, task constrains (network availability) etc.
+
+
+
 
 ## 1. Basic usage
 ---
 In order to, execute a task which modifies the user-interface and to retain it across configuration changes you will need to do three things:
 
 1. Create an implementation of the `Task` class;
-2. Execute the task using the `TaskManager` in an`Activity` which implements the `Callback` interface;
-3. Retain the task when configuration changes by overriding the `onStart()` method and calling the `TaskManager.attachListener()` method;
+2. Make your Activity extend the `TaskActivity` class (or for Fragments the `TaskFragment` class);
+3. Implement the `Callback` interface somewhere and execute the task using the `TaskManager`;
 
-The Activity's `TaskManager` makes sure that tasks can be retained across configuration changes and is responsible for removing the `Callback` listener when the Activity's user-interface is no longer valid. You are however responsible for re-attaching a new `Callback` listener when the Activity 's user-interface is restarted.
 
 ### 1.1 Creating the task
 
@@ -59,17 +68,23 @@ private class ExampleTask extends Task<Integer, String> {
 }
 ```
 
-
-### 1.2 Executing the task
-Before you can execute the `ExampleTask` you first need to get the current Activity's `TaskManager`. A `TaskManager` keeps references to tasks and executes them. You can obtain the current Activity's `TaskManager` using the `TaskManager.getActivityTaskManager()` method:
+### 1.2 Extending from the TaskActivity class
+The `TaskActivity` class is the most easy way to use this library, make sure your Activity extends from it and it wil take care of retaining all `Tasks` started by the Activity's `TaskManager`.
 
 ```java
-public TaskManager getTaskManager(){
-    return TaskManager.getActivityTaskManager(getSupportFragmentManager());
+public class Main extends TaskActivity {
+
 }
 ```
 
-Then you can execute the task using the `TaskManager.execute()` method. This method needs two arguments, the task to execute and a `Callback` listener to send feedback to. Preferably your activity implements the `Callback` interface, but this isn't necessarily needed.
+>**Help, I already extend some custom Activity implementation!** 
+>Don't worry, you can easily add the `TaskActivity` behaviour to any Activity or Fragment by using the `TaskManagerLifeCycleProxy` class . Check out [this sample](#using-the-taskmanagerlifecycleproxy-to-mimic-the-taskactivity).
+
+### 1.3 Execute the Task and receive callback
+Before you can execute the `ExampleTask` you first need to get the current Activity's `TaskManager`. A `TaskManager` keeps references to tasks and executes them. You can obtain the current Activity's `TaskManager` using the `TaskActivity.getTaskManager()` method.
+
+Then you can execute the task using the `TaskManager.execute()` method. This method needs two arguments, the task to execute and a `Callback` listener to send feedback to. Preferably your activity implements the `Callback` interface, but this isn't necessarily needed. The `TaskManager` currently always executes tasks in parallel *(work in progress to make it a option)*.
+
 
 ```java
 public class Main extends AppCompatActivity implements Task.Callback {
@@ -93,43 +108,57 @@ public class Main extends AppCompatActivity implements Task.Callback {
 }
 ```
 
-### 1.2 Retaining the task
-When the configuration changes (device rotates) the Activity's `TaskManager` will automatically remove the `Callback` listeners from all active tasks. This is needed otherwise the tasks could leak Activity, Fragment or other references.
+
+>**Tip:**
+>You can also make your Fragment extend the `TaskFragment` class and use a Fragment to execute and retain your task in. It works exactly the same, but keep in mind that the `Callback` listeners are removed as soon as the Fragments stops (`onStop()`). 
+
+
+### 1.4 Retaining the task
+When the configuration changes (device rotates) the `TaskManager` will automatically remove the `Callback` listeners from all active tasks and retain all `Tasks`. Removing the `Callback` is needed otherwise the tasks could leak Activity, Fragment or other references. 
 
 > **In-depth:**
-> The `TaskManager` will automatically remove the `Callback` listeners when the Activity is stopping (`onStop()`). At this moment the user-interface has become *"unstable"*, for example, when this happens the FragmentManager refuses to add new Fragments because the Activity's `onSaveInstanceState()` method has already been called. If the `Callback` listener is not removed by the `TaskManager` before this point, then a `DialogFragment.show()` call will throw an exception when called in the `onPostExecute()` method. This is why the `Callback` listeners are removed when the Activity stops.
+> The `TaskManger` (or actually a internal class) will detect when the Activity stops (`onStop()`). and will automatically remove all `Callback` listeners when this happens. At this moment the user-interface has become *"unstable"*,  this means that some user-interface functionality stops working. For example, the `FragmentManager` refuses at this point to add new Fragments because the Activity's `onSaveInstanceState()` method already has been called. If the `Callback` listener is not removed by the `TaskManager` before this point, then a `DialogFragment.show()` call will throw an exception when called in the `onPostExecute()` method. This is why the `Callback` listeners are removed when the Activity stops.
 
-To retain the task when your Activity is recreated you will need to re-attach a (new) `Callback` listener using the `TaskManager.attachListener()` method. The best place to do this is in the `onStart()` method right after the user-interface has been created.
-
+Although tasks are automatically retained, you will still need to provide a new `Callback` listener for each `Task`. You can easily do this by implementing (overriding) the `TaskActivity` (or `TaskFragment`) `onPreAttachTask(Task)` method and return a `Callback` instance. At this point you can also use the `onPreAttachTask(Task)` method to restore the user-interface state according to the `Tasks` state. The `onPreAttachTask(Task)` method will be called for each task that isn't finished (didn't deliver).
 
 ```java
-@Override
-public void onStart(){
-    super.onStart();
-    //Re-attach the this Activity as listener for task
-    getTaskManager().attachListener("activity-unique-tag", this);
+public class Main extends AppCompatActivity implements Task.Callback {
+
+    @Override
+    public Task.Callback onPreAttach(Task<?, ?> task) {
+	    //Restore the user-interface based on the tasks state
+        return this; //This Activity implements Task.Callback
+    }
 }
 ```
 
+
 ## 2. How it works
 ---
-####**Retaining tasks**
-Tasks retained using the described method are stored in a *"no-ui-fragment"* this fragment retained across configuration changes and is added to your Activity's `FragmentManager` the first time you call `TaskManager.getActivityTaskManager()`. This fragment is from that point on bound to the Activity's life-cycle and holds an internal `TaskManager`. The fragment makes sure that the internal `TaskManager` removes all `Callback` listeners as soon as the Activity is stopping (`onStop()`).
+####**How are tasks retained?**
+Tasks are are stored in `FragmentManagers` which are stored in a *"no-ui-fragment"* this fragment retained across configuration changes and is added to your Activity's `FragmentManager` the first time you call:
 
-####**Task without callback finishes**
-When a Task doesn't have a `Callback` listener to deliver it's results to it will skip the delivery and redeliver the results as soon as a new listener is attached. If you call the `TaskManager.attachListener()` method in the `onStart()` method, then the listener will be fired and you need to be sure that the user-interface is ready.
+ - `TaskActivity.getTaskManager()`;
+ - `TaskFragment.getTaskManager()`;
+ - `TaskManager.getActivityTaskManager()` (super-advanced usage);
+ - `TaskManager.getFragmentTaskManager()` (super-advanced usage);
 
-Only the `onPostExecute()` and `onCanceled()` methods will be redelivered, other methodes won't be redelivered.
+The *"no-ui-fragment"* is from that point on bound to the Activity's life-cycle and keeps track of all `TaskManager` instances. It also makes sure that all internal `TaskManagers` remove all `Callback` listeners as soon as the Activity is stopping (`onStop()`). It might also throw an exception if a `Fragment` `TaskManger` did not remove the `Callback` listeners, so that you (the developer) know you've messed up.
 
-####**Task and Callback life-cycle**
-A `Task` basically has four life-cycle methods:
+####**What happens when a Task without callback finishes?**
+When a Task doesn't have a `Callback` listener to deliver it's results to it will skip the delivery and redeliver the results as soon as a new listener is attached. This happens for example when the `onPreAttachTask(Task)` method returns, the newly provided `Callback` listener will be fired and you need to be sure that the user-interface is ready. It might also happen if you manually call one of the `TaskManager.attach()` methods (advanced usage).
+
+**Important:** Only the `onPostExecute()` and `onCanceled()` methods will be redelivered, other methodes won't be redelivered. You can restore a tasks progress using the `Task.getLastKnownProgress()` method.
+
+####**What does the Task and Callback life-cycle look like?**
+A `Task` basically has four life-cycle methods *(its heavily based on Android's AsyncTask)*:
 
 * `onPreExecute()` *[ui-thread]*
 * `doInBackground()` *[executor-thread]*
 * `onProgressUpdate()` *[ui-thread]*
 * `onPostExecute()` or `onCanceled()` *[ui-thread]*
 
-A `Callback` listener has the same life-cycle methods as the`Task` and reflects those methods to, for example, an Activity. All `Callback` methods are executed on the user interface thread. When a `Callback` listener is attached to the task, both the `Callback` and the `Task` methods will be called. But when the listener is detached from the task only the tasks methods will be called. With the exception of the `onPostExecute()` and `onCanceled()` methods which can be redelivered.
+A `Callback` listener has the same life-cycle methods as the`Task`. All `Callback` methods are executed on the user interface thread. When a `Callback` listener is attached to the task, both the `Callback` and the `Task` methods will be called. But when the listener is detached from the task only the tasks methods will be called. With exception of the `onPostExecute()` and `onCanceled()` methods which can be redelivered.
 
 
 ## 3. Advanced usage
@@ -155,7 +184,7 @@ To get the tasks most recent progress update use the `getLastKnownProgress()` me
 If you need the `onProgressUpdated` and `onCanceled` callback methods you can implement the `AdvancedCallback` interface, which is an extension of the `Callback` interface.
 
 ####**TaskExecutor & Executor**
-You can also execute tasks without using a `TaskManager` this means that you are responsible for removing and setting the `Callback` listener. Executing tasks without using the `TaskManager` is handy when you don't need to get any feedback to the Activity's user-interface.
+You can also execute tasks without using a `TaskManager` this means that you are responsible for removing and setting the `Callback` listener. Executing tasks without using the `TaskManager` is handy when you don't perse need to get any feedback to the user-interface.
 
 ```java
 TaskExecutor.executeParallel(new ExampleTask());
@@ -174,32 +203,86 @@ You can also use a custom java `Executor` to execute tasks with:
 TaskExecutor.executeOnExecutor(new ExampleTask(), yourExecutor);
 ```
 
+####**Using the TaskManagerLifeCycleProxy to mimic the TaskActivity**
+If you already use some custom Activity or Fragment implementation you might not be able to use the `TaskActivity` or `TaskFragment` class. To overcome this problem you can implement the behaviour of the `TaskActivity` yourself using the `TaskManagerLifeCycleProxy` class.
+
+Create a new `TaskManagerLifeCycleProxy` instance and let your Activity (or Fragment) implement the `TaskManagerProvider` interface. Override the`onStart()` and `onStop()` methods and proxy those together with the `getTaskManager()` method  to the `TaskManagerLifeCycleProxy` instance.
+
+```java
+public class MyBaseActivity extends SomeActivity implements TaskManagerProvider {
+
+    private TaskManagerLifeCycleProxy proxy = new TaskManagerLifeCycleProxy(this);
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        proxy.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        proxy.onStop();
+        super.onStop();
+    }
+
+    @Override
+    public TaskManager getTaskManager() {
+        return proxy.getTaskManager();
+    }
+
+    @Override
+    public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+        return null;
+    }
+}
+```
+
+
+
+
+
 ## 4. FAQ
 
 ####**Why does the Task class still have the onPostExecute and onPreExecute etc. methods?**
 
-Although the `Callback` interface provides these methods sometimes you don't need any callback to the Activity's user-interface, at that moment the Task methods come in handy.
+Although the `Callback` interface provides these methods sometimes you don't need any callback to the Activity's user-interface, at that moment the Task methods come in handy. It also gives a `Task` the change to modify it's state or store it's progress values, for example:
 ```java
-private class VerySimpleTask extends Task<Void, Boolean> {
+private class VerySimpleTask extends Task<Integer, Integer> {
 
-    private final File fileToRemove;
-    private final Context context;
+    private final ArrayList<Integer> progressValues = new ArrayList<>();
     
-    public ExampleTask(String tag, Context context, File fileToRemove){
+    public ExampleTask(String tag){
 		super(tag);
-		this.fileToRemove = fileToRemove;
-		this.context = context.getApplicationContext();
 	}
 	
 	@Override
-	protected String doInBackground() {
-		return fileToRemove.delete();
+	protected Boolean doInBackground() {
+		for(int i = 0; i < 10; i++){
+		    publishProgress(i);
+            SystemClock.sleep(500);
+        }
+		return 10;
 	}
 	
 	@Override
-	protected void onPostExecute(){
-		Toast.makeText(context, "Removed file: " + getResult(), Toast.LENGTH_SHORT).show();
+	protected void onProgressUpdate(Integer value) {
+	    progressValues.add(value);
     }
-	
+    
+    public List<Integer> getProgressCache(){
+        /**
+         * This method is safe to call on the ui-thread because the
+         * onProgressUpdate method is executed on the same thread.
+         */
+        return progressValues;
+    }
 }
 ```
+
+## 5. To-Do
+
+*“As long as I am breathing, in my eyes, I am just beginning.”*
+
+ - Add custom Executors to the TaskManager;
+ - Finish documentation;
+ - Write real tests for the library besides having only a demo app;
