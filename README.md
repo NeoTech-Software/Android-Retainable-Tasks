@@ -96,7 +96,7 @@ Then you can execute the task using the `TaskManager.execute()` method. This met
 
 
 ```java
-public class Main extends AppCompatActivity implements Task.Callback {
+public class Main extends TaskActivityCompat implements Task.Callback {
 
 	@Override
 	public void onClick(View view){
@@ -131,7 +131,7 @@ When the configuration changes (device rotates) the `TaskManager` will automatic
 Although tasks are automatically retained, you will still need to provide a new `Callback` listener for each `Task`. You can easily do this by implementing (overriding) the `TaskActivityCompat` (or `TaskFragmentCompat`) `onPreAttachTask(Task)` method and return a `Callback` instance. At this point you can also use the `onPreAttachTask(Task)` method to restore the user-interface state according to the `Tasks` state. The `onPreAttachTask(Task)` method will be called for each task that isn't finished (didn't deliver).
 
 ```java
-public class Main extends AppCompatActivity implements Task.Callback {
+public class Main extends TaskActivityCompat implements Task.Callback {
 
     @Override
     public Task.Callback onPreAttach(Task<?, ?> task) {
