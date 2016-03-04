@@ -5,6 +5,13 @@
 
 Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android `AsyncTask` implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).
 
+*Key features:*
+
+ - Light weight
+ - Same Task API on all Android versions, based on the Marshmallow AsyncTask implementation.
+ - Simple API
+ - Supports API 9+ <sub>(or 11+ if you not use the support library based classes)</sub>
+
 **Add it to your project**
 
 Android-Retainable-Tasks is available on jCenter, just add the following compile dependency to your modules build.gradle file.
@@ -140,10 +147,14 @@ public class Main extends AppCompatActivity implements Task.Callback {
 ####**How are tasks retained?**
 Tasks are are stored in `FragmentManagers` which are stored in a *"no-ui-fragment"* this fragment retained across configuration changes and is added to your Activity's `FragmentManager` the first time you call:
 
- - `TaskActivityCompat.getTaskManager()`;
- - `TaskFragmentCompat.getTaskManager()`;
- - `TaskManager.getActivityTaskManager()` (super-advanced usage);
- - `TaskManager.getFragmentTaskManager()` (super-advanced usage);
+ - `getTaskManager()` in the following classes:
+     - `TaskActivity` & `TaskActivityCompat`
+     - `TaskFragment` & `TaskFragmentCompat`
+ - `TaskManagerLifeCycleProxy.getTaskManager()`
+ - `TaskManager.getActivityTaskManager()` <sub>(super-advanced usage)</sub>
+ - `TaskManager.getFragmentTaskManager()` <sub>(super-advanced usage)</sub>
+
+Essentially any time you request a `TaskManager`.
 
 The *"no-ui-fragment"* is from that point on bound to the Activity's life-cycle and keeps track of all `TaskManager` instances. It also makes sure that all internal `TaskManagers` remove all `Callback` listeners as soon as the Activity is stopping (`onStop()`). It might also throw an exception if a `Fragment` `TaskManger` did not remove the `Callback` listeners, so that you (the developer) know you've messed up.
 
@@ -238,10 +249,6 @@ public class MyBaseActivity extends SomeActivity implements TaskManagerProvider 
     }
 }
 ```
-
-
-
-
 
 ## 4. FAQ
 
