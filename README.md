@@ -1,5 +1,6 @@
 # Android-Retainable-Tasks
 [ ![Download](https://api.bintray.com/packages/rolf-smit/maven/android-retainable-tasks/images/download.svg) ](https://bintray.com/rolf-smit/maven/android-retainable-tasks/_latestVersion)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android%20Retainable%20Tasks-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/3236)
 
 *Version 0.2.0 has quite some changes compared to version 0.1.0, so please read this document very carefully.*
 
