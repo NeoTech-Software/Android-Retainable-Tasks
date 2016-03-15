@@ -7,8 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.neotech.app.retainabletasksdemo.tasks.CountDownTask;
@@ -22,6 +24,12 @@ public class Main extends TaskActivityCompat implements View.OnClickListener, Ta
 
     private static final String TASK_RETAIN_UI_STATE = "retain-ui-state";
     private static final String TASK_PROGRESS = "progress-dialog";
+    private static final String TASK_SERIAL = "serial-";
+
+    private static final int[] serialTaskText = new int[]{R.string.task_serial_1, R.string.task_serial_2, R.string.task_serial_2};
+    private static final Button[] serialTaskButton = new Button[3];
+
+
     private static final String DIALOG_PROGRESS = "progress-dialog";
 
     private ProgressDialog progressDialog;
@@ -40,6 +48,16 @@ public class Main extends TaskActivityCompat implements View.OnClickListener, Ta
         findViewById(R.id.fab).setOnClickListener(this);
         findViewById(R.id.button_no_ui_task).setOnClickListener(this);
         findViewById(R.id.button_progress_task).setOnClickListener(this);
+
+
+        ((TextView) findViewById(R.id.text_serial_tasks)).setText(Html.fromHtml(getString(R.string.task_serial)));
+        serialTaskButton[0] = (Button) findViewById(R.id.button_serial_task_1);
+        serialTaskButton[0].setOnClickListener(this);
+        serialTaskButton[1] = (Button) findViewById(R.id.button_serial_task_2);
+        serialTaskButton[1].setOnClickListener(this);
+        serialTaskButton[2] = (Button) findViewById(R.id.button_serial_task_3);
+        serialTaskButton[2].setOnClickListener(this);
+
 
         retainUserInterfaceButton = (Button) findViewById(R.id.button_retain_ui_state_task);
         retainUserInterfaceButton.setOnClickListener(this);
@@ -60,6 +78,8 @@ public class Main extends TaskActivityCompat implements View.OnClickListener, Ta
             }
         } else if(task.getTag().equals(TASK_PROGRESS)){
             progressDialog = ProgressDialog.getExistingInstance(getSupportFragmentManager(), DIALOG_PROGRESS);
+        } else if(task.getTag().startsWith(TASK_SERIAL)){
+            onPreAttachSerialTask(task);
         }
         return this;
     }
@@ -87,6 +107,15 @@ public class Main extends TaskActivityCompat implements View.OnClickListener, Ta
             startActivity(new Intent(this, ActivityWithFragments.class));
         } else if(id == R.id.button_open_v11_activity){
             startActivity(new Intent(this, ActivityV11.class));
+        } else if(id == R.id.button_serial_task_1){
+            getTaskManager().execute(new CountDownTask(TASK_SERIAL + 1, 10), this, TaskExecutor.SERIAL_EXECUTOR);
+            v.setEnabled(false);
+        } else if(id == R.id.button_serial_task_2){
+            getTaskManager().execute(new CountDownTask(TASK_SERIAL + 2, 10), this, TaskExecutor.SERIAL_EXECUTOR);
+            v.setEnabled(false);
+        } else if(id == R.id.button_serial_task_3){
+            getTaskManager().execute(new CountDownTask(TASK_SERIAL + 3, 10), this, TaskExecutor.SERIAL_EXECUTOR);
+            v.setEnabled(false);
         }
     }
 
@@ -105,6 +134,8 @@ public class Main extends TaskActivityCompat implements View.OnClickListener, Ta
         } else if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
             retainUserInterfaceButton.setEnabled(true);
             retainUserInterfaceButton.setText(R.string.task_retain_ui_state);
+        } else if(task.getTag().startsWith(TASK_SERIAL)) {
+            onPostExecuteSerialTask(task);
         }
     }
 
@@ -122,11 +153,40 @@ public class Main extends TaskActivityCompat implements View.OnClickListener, Ta
             progressDialog.setProgress((int) progress);
         } else if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
             retainUserInterfaceButton.setText("" + (int) progress);
+        } else if(task.getTag().startsWith(TASK_SERIAL)){
+            onProgressUpdateSerialTask(task, (Integer) progress);
         }
     }
 
     @Override
     public void onDialogFragmentClick(DialogFragment fragment, int which) {
         getTaskManager().cancel(TASK_PROGRESS);
+    }
+
+
+
+    private int getSerialTaskIndex(String tag){
+        return Integer.parseInt(tag.substring(TASK_SERIAL.length())) - 1;
+    }
+
+    private void onPreAttachSerialTask(Task<?, ?> task) {
+        final int index = getSerialTaskIndex(task.getTag());
+        serialTaskButton[index].setEnabled(false);
+        final Integer progress = (Integer) task.getLastKnownProgress();
+        if (progress != null) {
+            serialTaskButton[index].setText("" + progress);
+        }
+    }
+
+    private void onPostExecuteSerialTask(Task<?, ?> task) {
+        final int index = getSerialTaskIndex(task.getTag());
+        serialTaskButton[index].setEnabled(false);
+        serialTaskButton[index].setText(serialTaskText[index]);
+        serialTaskButton[index].setEnabled(true);
+    }
+
+    private void onProgressUpdateSerialTask(Task<?, ?> task, int progress){
+        final int index = getSerialTaskIndex(task.getTag());
+        serialTaskButton[index].setText("" + progress);
     }
 }

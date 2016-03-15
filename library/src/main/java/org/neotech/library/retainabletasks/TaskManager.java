@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentManager;
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 import org.neotech.library.retainabletasks.internal.TaskRetainingFragment;
 
+import java.util.concurrent.Executor;
+
 /**
  * Created by Rolf on 29-2-2016.
  */
@@ -71,6 +73,9 @@ public abstract class TaskManager {
 
     @MainThread
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback);
+
+    @MainThread
+    public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor);
 
     @MainThread
     public abstract boolean isResultDelivered(@NonNull String tag);

@@ -3,14 +3,17 @@ package org.neotech.library.retainabletasks.internal;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Pair;
 
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskExecutor;
 import org.neotech.library.retainabletasks.TaskManager;
 import org.neotech.library.retainabletasks.TaskManagerProvider;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Created by Rolf on 29-2-2016.
@@ -27,12 +30,28 @@ public final class BaseTaskManager extends TaskManager {
     }
 
     public void attach(TaskManagerProvider taskManagerProvider){
-        for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
+        /*
+         * If this loop would directly set new Callback listeners it could cause a task to deliver
+         * its result. Meaning that the removeFinishedTask method can be called causing the 'tasks'
+         * Map to change which results in a ConcurrentModificationException. Hence the second loop
+         * for actually attaching the Callback listeners.
+         *
+         * This behaviour has been confirmed on Android 2.2 (API 8).
+         *
+         * Note: synchronization is not needed (and wouldn't help) as all methods (attach,
+         * removeFinishedTask, etc.) are supposed to be called on the UI thread.
+         */
+        final ArrayList<Pair<Task<?, ?>, Task.Callback>> attachQueue = new ArrayList<>(tasks.size());
+
+        for (Map.Entry<String, Task<?, ?>> task : tasks.entrySet()) {
             Task.Callback callback = taskManagerProvider.onPreAttach(task.getValue());
-            if(callback == null){
+            if (callback == null) {
                 throw new IllegalArgumentException("Could not attach Task '" + task.getKey() + "' because onPreAttach did not return a valid Callback listener! Did you override onPreAttach()?");
             }
-            attach(task.getValue(), callback);
+            attachQueue.add(new Pair<Task<?, ?>, Task.Callback>(task.getValue(), callback));
+        }
+        for(Pair<Task<?, ?>, Task.Callback> task: attachQueue){
+            attach(task.first, task.second);
         }
     }
 
@@ -95,13 +114,18 @@ public final class BaseTaskManager extends TaskManager {
     @Override
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback){
+        execute(task, callback, TaskExecutor.getDefaultExecutor());
+    }
+
+    @Override
+    public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor) {
         final Task currentTask = tasks.get(task.getTag());
         if(currentTask != null && currentTask.isRunning()){
             throw new IllegalStateException("Task with an equal tag: '" + task.getTag() + "' has already been added and is currently running or finishing.");
         }
         tasks.put(task.getTag(), task);
         task.setCallback(new CallbackShadow(callback));
-        TaskExecutor.execute(task);
+        TaskExecutor.executeOnExecutor(task, executor);
     }
 
     @Override
@@ -117,7 +141,6 @@ public final class BaseTaskManager extends TaskManager {
         Task task = tasks.get(tag);
         return task != null && task.isRunning();
     }
-
 
     @Override
     @MainThread
@@ -156,7 +179,7 @@ public final class BaseTaskManager extends TaskManager {
 
     private void removeFinishedTask(Task expectedTask){
         Task task = tasks.get(expectedTask.getTag());
-        if(task != expectedTask){
+        if (task != expectedTask) {
             Log.i(TAG, "Task '" + expectedTask.getTag() + "' has already been removed, because another task with the same tag has been added while this task was finishing.");
         }
         tasks.remove(expectedTask.getTag());

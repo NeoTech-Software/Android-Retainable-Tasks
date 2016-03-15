@@ -5,6 +5,10 @@
     <string name="toast_task_finished">\'%1$s\' finished.</string>
     <string name="toast_task_canceled">\'%1$s\' canceled.</string>
 
+    <string name="task_serial">"<![CDATA[<strong>Serial tasks</strong><br />These tasks won't run in parallel like the other tasks, they wait for each other to finish.]]>"</string>
+    <string name="task_serial_1">Serial task #1</string>
+    <string name="task_serial_2">Serial task #2</string>
+    <string name="task_serial_3">Serial task #3</string>
 
     <string name="task_fragment_based">Start fragment based task</string>
     <string name="task_no_ui_callback">Task without UI callback</string>

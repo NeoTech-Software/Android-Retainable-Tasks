@@ -49,5 +49,31 @@
             android:layout_width="wrap_content"
             android:text="@string/task_retain_ui_state" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/text_serial_tasks"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:id="@+id/button_serial_task_1"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/task_serial_1" />
+
+        <Button
+            android:id="@+id/button_serial_task_2"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/task_serial_2" />
+
+        <Button
+            android:id="@+id/button_serial_task_3"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/task_serial_3" />
+
     </LinearLayout>
 </ScrollView>
