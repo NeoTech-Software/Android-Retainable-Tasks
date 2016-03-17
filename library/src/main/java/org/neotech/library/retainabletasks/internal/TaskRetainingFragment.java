@@ -64,7 +64,7 @@ public final class TaskRetainingFragment {
         return taskManager;
     }
 
-    public void assertAllRemoved(){
+    public void assertFragmentTasksAreDetached(){
         if(!TaskManager.isStrictDebugModeEnabled()){
             return;
         }
@@ -75,5 +75,12 @@ public final class TaskRetainingFragment {
                 throw new IllegalStateException("", e);
             }
         }
+    }
+
+    public void assertActivityTasksAreDetached(){
+        if(!TaskManager.isStrictDebugModeEnabled()){
+            return;
+        }
+        taskManager.assertAllTasksDetached();
     }
 }

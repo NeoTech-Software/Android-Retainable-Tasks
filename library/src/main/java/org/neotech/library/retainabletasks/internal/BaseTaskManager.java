@@ -1,5 +1,6 @@
 package org.neotech.library.retainabletasks.internal;
 
+import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -30,6 +31,9 @@ public final class BaseTaskManager extends TaskManager {
     }
 
     public void attach(TaskManagerProvider taskManagerProvider){
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         /*
          * If this loop would directly set new Callback listeners it could cause a task to deliver
          * its result. Meaning that the removeFinishedTask method can be called causing the 'tasks'
@@ -77,6 +81,9 @@ public final class BaseTaskManager extends TaskManager {
 
     @Override
     public Task<?, ?> attach(@NonNull Task<?, ?> task, @NonNull Task.Callback callback) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         task.setCallback(new CallbackShadow(callback));
         return task;
     }
@@ -97,6 +104,9 @@ public final class BaseTaskManager extends TaskManager {
 
     @Override
     public Task<?, ?> detach(@NonNull String tag) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         final Task<?, ?> task = tasks.get(tag);
         if(task != null){
             task.removeCallback();
@@ -119,6 +129,9 @@ public final class BaseTaskManager extends TaskManager {
 
     @Override
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         final Task currentTask = tasks.get(task.getTag());
         if(currentTask != null && currentTask.isRunning()){
             throw new IllegalStateException("Task with an equal tag: '" + task.getTag() + "' has already been added and is currently running or finishing.");
@@ -131,6 +144,9 @@ public final class BaseTaskManager extends TaskManager {
     @Override
     @MainThread
     public boolean isResultDelivered(@NonNull String tag) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         Task task = tasks.get(tag);
         return task != null && task.isResultDelivered();
     }
@@ -138,6 +154,9 @@ public final class BaseTaskManager extends TaskManager {
     @Override
     @MainThread
     public boolean isRunning(@NonNull String tag) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         Task task = tasks.get(tag);
         return task != null && task.isRunning();
     }
@@ -145,11 +164,21 @@ public final class BaseTaskManager extends TaskManager {
     @Override
     @MainThread
     public Task<?, ?> cancel(@NonNull String tag){
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         final Task<?, ?> task = tasks.remove(tag);
         if(task != null){
             task.cancel(false);
         }
         return task;
+    }
+
+
+    public void assertMainThread() throws IllegalStateException {
+        if(Looper.getMainLooper() != Looper.myLooper()){
+            throw new IllegalStateException("Method not called on the UI-thread!");
+        }
     }
 
     @Override
@@ -165,6 +194,9 @@ public final class BaseTaskManager extends TaskManager {
 
     @MainThread
     public void cancelAll(){
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
         for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
             task.getValue().cancel(true);
         }
@@ -172,6 +204,14 @@ public final class BaseTaskManager extends TaskManager {
 
     @MainThread
     public void detach(){
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
+        /**
+         * The problem described in the attach(TaskManagerProvider) doesn't apply to this method
+         * as all TaskManager methods should be executed on the UI-thread, meaning that no other
+         * method can be called while inside this method.
+         */
         for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
             task.getValue().removeCallback();
         }

@@ -21,7 +21,7 @@ public final class TaskRetainingFragmentCompat extends Fragment {
         super.onStop();
         //As soon as the activity is stopped the UI should not be touched.
         logic.getActivityTaskManager().detach();
-        logic.assertAllRemoved();
+        logic.assertActivityTasksAreDetached();
     }
 
     @Override
@@ -34,7 +34,8 @@ public final class TaskRetainingFragmentCompat extends Fragment {
          * The references to the tasks are lost at this point.
          */
 
-        logic.getActivityTaskManager().detach();
+        //logic.getActivityTaskManager().detach();
+        logic.assertFragmentTasksAreDetached();
         super.onDestroy();
     }
 }
