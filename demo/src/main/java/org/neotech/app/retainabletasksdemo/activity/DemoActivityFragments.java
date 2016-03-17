@@ -1,4 +1,4 @@
-package org.neotech.app.retainabletasksdemo;
+package org.neotech.app.retainabletasksdemo.activity;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -14,9 +14,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.neotech.app.retainabletasksdemo.R;
+import org.neotech.app.retainabletasksdemo.TestFragment;
+
 import java.util.HashMap;
 
-public class ActivityWithFragments extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public class DemoActivityFragments extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String[] FRAGMENT_TAGS = new String[]{"Fragment 1", "Fragment 2", "Fragment 3"};
 
@@ -26,7 +29,7 @@ public class ActivityWithFragments extends AppCompatActivity  implements Navigat
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_with_fragments);
+        setContentView(R.layout.activity_demo_fragments);
 
         adapter = new FragmentAdapter(getSupportFragmentManager(), R.id.fragment_container, 3);
         for (String FRAGMENT_TAG : FRAGMENT_TAGS) {
@@ -50,7 +53,7 @@ public class ActivityWithFragments extends AppCompatActivity  implements Navigat
         }
     }
 
-    public void setTitle(String title){
+    private void setTitle(String title){
         getSupportActionBar().setTitle(title);
     }
 
@@ -115,21 +118,12 @@ public class ActivityWithFragments extends AppCompatActivity  implements Navigat
         return true;
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
     public static class FragmentAdapter {
 
         private final HashMap<String, Class<? extends Fragment>> fragments;
 
         private final FragmentManager fragmentManager;
         private final int containerId;
-
-        public FragmentAdapter(FragmentManager fragmentManager, int containerViewId){
-            this(fragmentManager, containerViewId, 4);
-        }
 
         public FragmentAdapter(FragmentManager fragmentManager, int containerViewId, int initialSize){
             this.fragments = new HashMap<>(initialSize);
@@ -139,14 +133,6 @@ public class ActivityWithFragments extends AppCompatActivity  implements Navigat
 
         public void addFragment(String tag, Class<? extends Fragment> fragmentClass){
             fragments.put(tag, fragmentClass);
-        }
-
-        public int size(){
-            return fragments.size();
-        }
-
-        public Fragment getFragment(String tag){
-            return fragmentManager.findFragmentByTag(tag);
         }
 
         public Fragment getCurrentFragment(){

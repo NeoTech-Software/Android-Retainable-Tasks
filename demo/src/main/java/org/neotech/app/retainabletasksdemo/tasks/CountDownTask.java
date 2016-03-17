@@ -1,6 +1,7 @@
 package org.neotech.app.retainabletasksdemo.tasks;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.neotech.library.retainabletasks.Task;
 
@@ -18,7 +19,12 @@ public class CountDownTask extends Task<Integer, Void> {
 
     @Override
     protected Void doInBackground() {
+        Log.i("CountDownTask", "Task '" + getTag() + "' started!");
         for(int i = amount; i > 0; i--){
+            if(isCancelled()){
+                Log.i("CountDownTask", "Task '" + getTag() + "' has been cancelled!");
+                return null;
+            }
             publishProgress(i);
             SystemClock.sleep(1000); //Inaccurate count-down, but hey... its an example :)
         }

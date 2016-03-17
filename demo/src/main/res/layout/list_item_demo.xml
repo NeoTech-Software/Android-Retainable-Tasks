@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@android:id/title" />
+
+    <TextView
+        android:layout_below="@android:id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@android:id/message" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:layout_below="@android:id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppTheme.Button.Colored"
+        android:text="@string/button_start_demo"
+        android:id="@+id/button_start_demo"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:layout_below="@android:id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:text="@string/button_view_code"
+        android:id="@+id/button_view_code"
+        android:layout_toLeftOf="@+id/button_start_demo"
+        android:layout_toStartOf="@+id/button_start_demo" />
+</RelativeLayout>

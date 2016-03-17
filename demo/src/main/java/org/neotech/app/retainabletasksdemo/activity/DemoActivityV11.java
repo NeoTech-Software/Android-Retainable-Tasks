@@ -1,4 +1,4 @@
-package org.neotech.app.retainabletasksdemo;
+package org.neotech.app.retainabletasksdemo.activity;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import org.neotech.app.retainabletasksdemo.R;
 import org.neotech.app.retainabletasksdemo.tasks.CountDownTask;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.providers.TaskActivity;
@@ -15,7 +16,7 @@ import org.neotech.library.retainabletasks.providers.TaskActivity;
 /**
  * Created by Rolf on 4-3-2016.
  */
-public class ActivityV11 extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback {
+public class DemoActivityV11 extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback {
 
     private static final String TASK_COUNT_DOWN = "count-down";
     private Button button;

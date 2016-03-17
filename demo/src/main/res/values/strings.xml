@@ -5,7 +5,6 @@
     <string name="toast_task_finished">\'%1$s\' finished.</string>
     <string name="toast_task_canceled">\'%1$s\' canceled.</string>
 
-    <string name="task_serial">"<![CDATA[<strong>Serial tasks</strong><br />These tasks won't run in parallel like the other tasks, they wait for each other to finish.]]>"</string>
     <string name="task_serial_1">Serial task #1</string>
     <string name="task_serial_2">Serial task #2</string>
     <string name="task_serial_3">Serial task #3</string>
@@ -31,5 +30,23 @@
 
         Try it out! First press the button to start a new Task then select another Fragment.
         "</string>
+
+    <string name="button_view_code">View code</string>
+    <string name="button_start_demo">Start demo</string>
+
+    <string name="menu_github">View on GitHub</string>
+
+
+    <string name="demo_fragments_title">Fragment TaskManager</string>
+    <string name="demo_fragments_description">"<![CDATA[This demonstration shows how individual Fragments use the <code>TaskManager</code> class to start and manage <code>Tasks</code>. Each Fragment extends from the <code>TaskFragmentCompat</code> class, which means that each Fragment has it's own <code>TaskManager</code> instance. <code>Task</code> results are only delivered to the Fragment if it is currently attached to the Activity.]]>"</string>
+
+    <string name="demo_no_compat_title">API 11+ Activity</string>
+    <string name="demo_no_compat_description">"<![CDATA[This demonstration shows a <code>TaskActivity</code> implementation, the <code>TaskActivity</code> class can only be used on devices with Android API level 11+. It doesn't use the Android support libraries.<br><br><strong>Warning:</strong> this demo will crash when used on devices below API level 11.]]>"</string>
+
+    <string name="demo_examples_title">Basic examples</string>
+    <string name="demo_examples_description">"<![CDATA[This demonstration shows an Activity which extends the <code>TaskActivityCompat</code> class. It demonstrates how <code>Tasks</code> are started using the Activity's <code>TaskManager</code> and how <code>Tasks</code> are retained and attached to the UI after a configuration change.]]>"</string>
+
+    <string name="demo_serial_title">Serial execution</string>
+    <string name="demo_serial_description">"<![CDATA[By default <code>Tasks</code> are executed using a parallel Executor. This demonstration shows how <code>Tasks</code> can be executed in serial using the <code>TaskManager.execute(Task, Callback, Executor)</code> method.]]>"</string>
 
 </resources>
