@@ -35,10 +35,10 @@ public class Main extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         ArrayList<Demo> demos = new ArrayList<>(1);
-        demos.add(new Demo(this, R.string.demo_examples_title, R.string.demo_examples_description, "https://github.com/NeoTech-Software/Android-Retainable-Tasks", new Intent(this, DemoActivityBasic.class)));
-        demos.add(new Demo(this, R.string.demo_serial_title, R.string.demo_serial_description, "https://github.com/NeoTech-Software/Android-Retainable-Tasks", new Intent(this, DemoActivitySerial.class)));
-        demos.add(new Demo(this, R.string.demo_fragments_title, R.string.demo_fragments_description, "https://github.com/NeoTech-Software/Android-Retainable-Tasks", new Intent(this, DemoActivityFragments.class)));
-        demos.add(new Demo(this, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "https://github.com/NeoTech-Software/Android-Retainable-Tasks", new Intent(this, DemoActivityV11.class)));
+        demos.add(new Demo(this, R.string.demo_examples_title, R.string.demo_examples_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityBasic.java", new Intent(this, DemoActivityBasic.class)));
+        demos.add(new Demo(this, R.string.demo_serial_title, R.string.demo_serial_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivitySerial.java", new Intent(this, DemoActivitySerial.class)));
+        demos.add(new Demo(this, R.string.demo_fragments_title, R.string.demo_fragments_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityFragments.java", new Intent(this, DemoActivityFragments.class)));
+        demos.add(new Demo(this, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(this, DemoActivityV11.class)));
 
 
         ListView list = (ListView) findViewById(android.R.id.list);
@@ -134,7 +134,7 @@ public class Main extends AppCompatActivity {
 
         public Demo(Context context, int titleResId, int descriptionResId, String uri, Intent intent){
             this.intentStart = intent;
-            this.intentView = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+            this.intentView = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NeoTech-Software/Android-Retainable-Tasks/tree/master/demo/src/main/java/" + uri));
             this.title = ExtendedHtml.fromHtml(context.getString(titleResId));
             this.description = ExtendedHtml.fromHtml(context.getString(descriptionResId));
         }
