@@ -45,7 +45,7 @@ public abstract class TaskManager {
      */
     @MainThread
     public abstract Task<?, ?> getTask(@NonNull String tag);
-    
+
     @MainThread
     public abstract Task<?, ?> attach(@NonNull String tag, @NonNull Task.Callback callback);
 

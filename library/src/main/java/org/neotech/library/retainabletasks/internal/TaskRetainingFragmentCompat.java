@@ -19,7 +19,7 @@ public final class TaskRetainingFragmentCompat extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        //As soon as the activity is stopped the UI should not be touched.
+        //Is this extra detach needed? Correct usage of the TaskManagerLifeCycleProxy should be enough.
         logic.getActivityTaskManager().detach();
         logic.assertActivityTasksAreDetached();
     }
@@ -29,12 +29,7 @@ public final class TaskRetainingFragmentCompat extends Fragment {
         /**
          * The activity is destroyed, this method WON'T be called when the fragment is being
          * propagated between activity instances.
-         *
-         * Cleanup, but let the tasks finish as they might do something important.
-         * The references to the tasks are lost at this point.
          */
-
-        //logic.getActivityTaskManager().detach();
         logic.assertFragmentTasksAreDetached();
         super.onDestroy();
     }
