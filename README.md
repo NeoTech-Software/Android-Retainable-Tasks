@@ -2,8 +2,6 @@
 [ ![Download](https://api.bintray.com/packages/rolf-smit/maven/android-retainable-tasks/images/download.svg) ](https://bintray.com/rolf-smit/maven/android-retainable-tasks/_latestVersion)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android%20Retainable%20Tasks-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/3236)
 
-*Version 0.2.0 has quite some changes compared to version 0.1.0, so please read this document very carefully.*
-
 Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android `AsyncTask` implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).
 
 *Key features:*
@@ -11,7 +9,7 @@ Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous ba
  - Light weight
  - Same Task API on all Android versions, based on the Marshmallow AsyncTask implementation.
  - Simple API
- - Supports API 9+ <sub>(or 11+ if you not use the support library based classes)</sub>
+ - Supports API 8+ <sub>(or 11+ if you not use the support library based classes)</sub>
 
 **Add it to your project**
 
@@ -19,7 +17,7 @@ Android-Retainable-Tasks is available on jCenter, just add the following compile
 
 ```groovy
 dependencies {
-    compile 'org.neotech.library:android-retainable-tasks:0.2.0'
+    compile 'org.neotech.library:android-retainable-tasks:0.2.1'
 }
 ```
 
