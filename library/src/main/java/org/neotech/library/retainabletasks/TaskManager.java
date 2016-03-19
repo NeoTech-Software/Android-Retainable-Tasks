@@ -45,8 +45,7 @@ public abstract class TaskManager {
      */
     @MainThread
     public abstract Task<?, ?> getTask(@NonNull String tag);
-
-
+    
     @MainThread
     public abstract Task<?, ?> attach(@NonNull String tag, @NonNull Task.Callback callback);
 
@@ -71,18 +70,54 @@ public abstract class TaskManager {
     @MainThread
     public abstract Task<?, ?> cancel(@NonNull String tag);
 
+    /**
+     * Start the given task on the default Executor
+     * ({@link TaskExecutor#getDefaultExecutor()}). The Task life-cycle events will be delivered to
+     * the given {@link Task.Callback} listener.
+     *
+     * @param task The Task to execute.
+     * @param callback The Callback listener to deliver the Task events to.
+     * @see TaskExecutor#setDefaultExecutor(Executor)
+     */
     @MainThread
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback);
 
+    /**
+     * Start the given task on {@link Executor}
+     * ({@link TaskExecutor#setDefaultExecutor(Executor)}). The Task life-cycle events will be
+     * delivered to the given {@link Task.Callback} listener.
+     *
+     * @param task The Task to execute.
+     * @param callback The Callback listener to deliver the Task events to.
+     * @param executor The Executor to execute the given Task with.
+     */
     @MainThread
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor);
 
+    /**
+     * Checks if the {@link Task} with the given tag has delivered it's result.
+     * @param tag The tag which identifies the Task to check.
+     * @return true if the Task did deliver it's result, false if not.
+     * @see Task#isResultDelivered()
+     */
     @MainThread
     public abstract boolean isResultDelivered(@NonNull String tag);
 
+    /**
+     * Checks if the {@link Task} with the given tag is running.
+     * @param tag The tag which identifies the Task to check.
+     * @return true if the Task is running ({@link Task#doInBackground()} is executing), false if
+     * not.
+     * @see Task#isRunning()
+     */
     @MainThread
     public abstract boolean isRunning(@NonNull String tag);
 
+    /**
+     * Debug use only. Checks if all {@link Task Tasks} added to this TaskManager have been
+     * detached.
+     * @throws IllegalStateException if one or more Tasks are not detached.
+     */
     @MainThread
     public abstract void assertAllTasksDetached() throws IllegalStateException;
 
