@@ -24,6 +24,7 @@ public final class BaseTaskManager extends TaskManager {
     private static final String TAG = "BaseTaskManager";
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
+    protected UIStateProvider uiStateProvider = null;
 
     @Override
     public Task<?, ?> getTask(@NonNull String tag) {
@@ -137,7 +138,11 @@ public final class BaseTaskManager extends TaskManager {
             throw new IllegalStateException("Task with an equal tag: '" + task.getTag() + "' has already been added and is currently running or finishing.");
         }
         tasks.put(task.getTag(), task);
-        task.setCallback(new CallbackShadow(callback));
+        if(uiStateProvider == null || uiStateProvider.isUserInterfaceReady() ){
+            task.setCallback(new CallbackShadow(callback));
+        } else {
+            task.removeCallback();
+        }
         TaskExecutor.executeOnExecutor(task, executor);
     }
 
@@ -223,6 +228,14 @@ public final class BaseTaskManager extends TaskManager {
             Log.i(TAG, "Task '" + expectedTask.getTag() + "' has already been removed, because another task with the same tag has been added while this task was finishing.");
         }
         tasks.remove(expectedTask.getTag());
+    }
+
+    public void setUIStateProvider(UIStateProvider uiStateProvider){
+        this.uiStateProvider = uiStateProvider;
+    }
+
+    public interface UIStateProvider {
+        boolean isUserInterfaceReady();
     }
 
     private final class CallbackShadow implements Task.AdvancedCallback  {

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spanned;
@@ -16,33 +18,36 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import org.neotech.app.retainabletasksdemo.ExtendedHtml;
 import org.neotech.app.retainabletasksdemo.R;
+import org.neotech.library.retainabletasks.Task;
+import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Rolf on 16-3-2016.
  */
-public class Main extends AppCompatActivity {
+public class Main extends TaskActivityCompat implements Task.Callback {
 
+    private ViewSwitcher vSwitcher;
+    private ListView list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+       // setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        ArrayList<Demo> demos = new ArrayList<>(1);
-        demos.add(new Demo(this, R.string.demo_examples_title, R.string.demo_examples_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityBasic.java", new Intent(this, DemoActivityBasic.class)));
-        demos.add(new Demo(this, R.string.demo_serial_title, R.string.demo_serial_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivitySerial.java", new Intent(this, DemoActivitySerial.class)));
-        demos.add(new Demo(this, R.string.demo_fragments_title, R.string.demo_fragments_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityFragments.java", new Intent(this, DemoActivityFragments.class)));
-        demos.add(new Demo(this, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(this, DemoActivityV11.class)));
+        vSwitcher = (ViewSwitcher) findViewById(R.id.switcher);
+        list = (ListView) findViewById(android.R.id.list);
 
-
-        ListView list = (ListView) findViewById(android.R.id.list);
-        list.setAdapter(new DemoAdapter(demos));
+        if(!getTaskManager().isRunning("list-loader")) {
+            getTaskManager().execute(new UselessLoadingTask("list-loader", this), this);
+        }
     }
 
     @Override
@@ -58,6 +63,57 @@ public class Main extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void setListShown(boolean shown){
+        if(vSwitcher.getCurrentView() == list && !shown){
+            vSwitcher.showNext();
+        } else if(vSwitcher.getCurrentView() != list && shown){
+            vSwitcher.showNext();
+        }
+    }
+
+    @Override
+    public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+        setListShown(false);
+        return this;
+    }
+
+    @Override
+    public void onPreExecute(Task<?, ?> task) {
+
+    }
+
+    @Override
+    public void onPostExecute(Task<?, ?> raw) {
+        UselessLoadingTask task = (UselessLoadingTask) raw;
+        list.setAdapter(new DemoAdapter(task.getResult()));
+        setListShown(true);
+    }
+
+    /**
+     * Task just to demonstrate the principe of starting a task before the UI is ready.
+     */
+    private static class UselessLoadingTask extends Task<Void, ArrayList<Demo>> {
+
+        private final Context context;
+
+        public UselessLoadingTask(String tag, Context context) {
+            super(tag);
+            this.context = context.getApplicationContext();
+        }
+
+        @Override
+        protected ArrayList<Demo> doInBackground() {
+            SystemClock.sleep(1500);
+            ArrayList<Demo> demos = new ArrayList<>(4);
+            demos.add(new Demo(context, R.string.demo_examples_title, R.string.demo_examples_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityBasic.java", new Intent(context, DemoActivityBasic.class)));
+            demos.add(new Demo(context, R.string.demo_serial_title, R.string.demo_serial_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivitySerial.java", new Intent(context, DemoActivitySerial.class)));
+            demos.add(new Demo(context, R.string.demo_fragments_title, R.string.demo_fragments_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityFragments.java", new Intent(context, DemoActivityFragments.class)));
+            demos.add(new Demo(context, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(context, DemoActivityV11.class)));
+            return demos;
+        }
+    }
+
 
     private static class DemoAdapter extends BaseAdapter implements View.OnClickListener {
 
@@ -80,6 +136,14 @@ public class Main extends AppCompatActivity {
 
         public DemoAdapter(ArrayList<Demo> demos){
             this.demos = demos;
+        }
+
+        public DemoAdapter(){
+            this.demos = new ArrayList<>();
+        }
+
+        public List<Demo> getItems(){
+            return demos;
         }
 
         @Override
