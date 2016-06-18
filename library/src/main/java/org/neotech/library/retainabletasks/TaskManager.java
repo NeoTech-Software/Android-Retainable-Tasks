@@ -151,7 +151,11 @@ public abstract class TaskManager {
     @MainThread
     public static TaskManager getFragmentTaskManager(@NonNull Fragment fragment){
         final String tag = getTaskManagerTag(fragment.getTag());
-        return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+        if(fragment.getParentFragment() != null){
+            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getParentFragment().getFragmentManager()), tag);
+        } else {
+            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+        }
     }
 
     /**
@@ -163,8 +167,23 @@ public abstract class TaskManager {
     @MainThread
     public static TaskManager getFragmentTaskManager(@NonNull android.app.Fragment fragment){
         final String tag = getTaskManagerTag(fragment.getTag());
-        return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
+            return getFragmentTaskManagerAPI17(fragment, tag);
+        } else {
+            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+        }
     }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @MainThread
+    private static TaskManager getFragmentTaskManagerAPI17(@NonNull android.app.Fragment fragment, String tag){
+        if(fragment.getParentFragment() != null){
+            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getParentFragment().getFragmentManager()), tag);
+        } else {
+            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+        }
+    }
+
 
     private static TaskManager getTaskManager(@NonNull TaskRetainingFragment taskRetainingFragment, @NonNull String tag){
         BaseTaskManager manager = (BaseTaskManager) taskRetainingFragment.findTaskManagerByTag(tag);

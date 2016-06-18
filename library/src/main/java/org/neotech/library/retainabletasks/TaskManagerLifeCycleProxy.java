@@ -12,10 +12,11 @@ import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 /**
  * Created by Rolf on 3-3-2016.
  */
-public final class TaskManagerLifeCycleProxy {
+public final class TaskManagerLifeCycleProxy implements BaseTaskManager.UIStateProvider {
 
     private BaseTaskManager fragmentTaskManager;
     private final TaskManagerProvider provider;
+    private boolean uiReady = false;
 
     public TaskManagerLifeCycleProxy(@NonNull TaskManagerProvider provider){
         if(!(provider instanceof Activity || provider instanceof Fragment || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && provider instanceof android.app.Fragment))){
@@ -32,10 +33,12 @@ public final class TaskManagerLifeCycleProxy {
     }
 
     public void onStart(){
+        uiReady = true;
         ((BaseTaskManager) getTaskManager()).attach(provider);
     }
 
     public void onStop(){
+        uiReady = false;
         ((BaseTaskManager) getTaskManager()).detach();
     }
 
@@ -56,6 +59,12 @@ public final class TaskManagerLifeCycleProxy {
             //This should never happen as the constructor checks everything.
         }
         */
+        fragmentTaskManager.setUIStateProvider(this);
         return fragmentTaskManager;
+    }
+
+    @Override
+    public boolean isUserInterfaceReady() {
+        return uiReady;
     }
 }
