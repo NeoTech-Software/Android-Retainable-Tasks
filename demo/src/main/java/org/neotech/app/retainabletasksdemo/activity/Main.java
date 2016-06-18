@@ -114,7 +114,6 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         }
     }
 
-
     private static class DemoAdapter extends BaseAdapter implements View.OnClickListener {
 
         private static class ViewHolder {
