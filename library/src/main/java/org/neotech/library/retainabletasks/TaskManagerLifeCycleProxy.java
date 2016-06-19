@@ -3,6 +3,7 @@ package org.neotech.library.retainabletasks;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -12,7 +13,7 @@ import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 /**
  * Created by Rolf on 3-3-2016.
  */
-public final class TaskManagerLifeCycleProxy implements BaseTaskManager.UIStateProvider {
+public final class TaskManagerLifeCycleProxy {
 
     private BaseTaskManager fragmentTaskManager;
     private final TaskManagerProvider provider;
@@ -32,23 +33,28 @@ public final class TaskManagerLifeCycleProxy implements BaseTaskManager.UIStateP
         this.provider = provider;
     }
 
+    @MainThread
     public void onStart(){
         uiReady = true;
+        ((BaseTaskManager) getTaskManager()).setUIReady(uiReady);
         ((BaseTaskManager) getTaskManager()).attach(provider);
     }
 
+    @MainThread
     public void onStop(){
         uiReady = false;
+        ((BaseTaskManager) getTaskManager()).setUIReady(uiReady);
         ((BaseTaskManager) getTaskManager()).detach();
     }
 
+    @MainThread
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public TaskManager getTaskManager(){
         if(fragmentTaskManager != null) {
             return fragmentTaskManager;
         }
         if(provider instanceof FragmentActivity){
-            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((FragmentActivity) provider).getSupportFragmentManager());
+            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((FragmentActivity) provider).getFragmentManager());
         } else if(provider instanceof Fragment){
             fragmentTaskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((Fragment) provider);
         } else if(provider instanceof Activity){
@@ -59,12 +65,7 @@ public final class TaskManagerLifeCycleProxy implements BaseTaskManager.UIStateP
             //This should never happen as the constructor checks everything.
         }
         */
-        fragmentTaskManager.setUIStateProvider(this);
+        fragmentTaskManager.setUIReady(uiReady);
         return fragmentTaskManager;
-    }
-
-    @Override
-    public boolean isUserInterfaceReady() {
-        return uiReady;
     }
 }

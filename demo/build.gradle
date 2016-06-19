@@ -27,9 +27,9 @@ dependencies {
     compile 'com.android.support:design:23.4.0'
 
     //LeakCanary is used to detect memory leaks in debug builds.
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3.1'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3.1'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3.1'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
 
     //Unit-testing
     testCompile 'junit:junit:4.12'
