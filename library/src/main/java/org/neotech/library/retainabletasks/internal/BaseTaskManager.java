@@ -160,7 +160,7 @@ public final class BaseTaskManager extends TaskManager {
     @Override
     @MainThread
     public boolean isRunning(@NonNull String tag) {
-        if(TaskManager.isStrictDebugModeEnabled()){
+        if (TaskManager.isStrictDebugModeEnabled()) {
             assertMainThread();
         }
         Task task = tasks.get(tag);
