@@ -99,7 +99,8 @@ public abstract class TaskManager {
     /**
      * Checks if the {@link Task} with the given tag has delivered it's result.
      * @param tag The tag which identifies the Task to check.
-     * @return true if the Task did deliver it's result, false if not.
+     * @return true if the Task did deliver it's result, false if the Task did not deliver it's
+     * result or the task is not found using {@link #getTask(String)}.
      * @see Task#isResultDelivered()
      */
     @MainThread
@@ -109,7 +110,7 @@ public abstract class TaskManager {
      * Checks if the {@link Task} with the given tag is running.
      * @param tag The tag which identifies the Task to check.
      * @return true if the Task is running ({@link Task#doInBackground()} is executing), false if
-     * not.
+     * the Task is not running or the task is not found using {@link #getTask(String)}.
      * @see Task#isRunning()
      */
     @MainThread
