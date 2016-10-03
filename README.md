@@ -17,7 +17,7 @@ Android-Retainable-Tasks is available on jCenter, just add the following compile
 
 ```groovy
 dependencies {
-    compile 'org.neotech.library:android-retainable-tasks:0.2.3'
+    compile 'org.neotech.library:android-retainable-tasks:0.2.4'
 }
 ```
 
