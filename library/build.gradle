@@ -16,7 +16,7 @@ ext {
     artifact = 'android-retainable-tasks'
 
     libraryDescription = 'Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android AsyncTask implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).'
-    libraryVersion = '0.2.3'
+    libraryVersion = '0.2.4'
 
     siteUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks'
     gitUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks.git'
@@ -36,12 +36,12 @@ group = publishedGroupId
 version = libraryVersion
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 8
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName = libraryVersion
     }
@@ -60,8 +60,8 @@ configurations {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    javadocCompile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    javadocCompile 'com.android.support:appcompat-v7:24.2.1'
 }
 
 apply from: 'publish-library.gradle'

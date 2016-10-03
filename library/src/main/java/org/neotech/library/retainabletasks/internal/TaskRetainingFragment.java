@@ -26,8 +26,6 @@ public final class TaskRetainingFragment {
         TaskRetainingFragmentCompat taskFragment = (TaskRetainingFragmentCompat) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if(taskFragment == null){
             taskFragment = new TaskRetainingFragmentCompat();
-        }
-        if(!taskFragment.isAdded()) {
             fragmentManager.beginTransaction().add(taskFragment, FRAGMENT_TAG).commit();
         }
         return taskFragment.logic;
@@ -38,8 +36,6 @@ public final class TaskRetainingFragment {
         TaskRetainingFragmentV11 taskFragment = (TaskRetainingFragmentV11) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if(taskFragment == null){
             taskFragment = new TaskRetainingFragmentV11();
-        }
-        if(!taskFragment.isAdded()) {
             fragmentManager.beginTransaction().add(taskFragment, FRAGMENT_TAG).commit();
         }
         return taskFragment.logic;

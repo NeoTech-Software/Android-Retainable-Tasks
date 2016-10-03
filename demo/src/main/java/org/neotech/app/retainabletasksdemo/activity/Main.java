@@ -8,6 +8,7 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,7 +41,6 @@ public class Main extends TaskActivityCompat implements Task.Callback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       // setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         vSwitcher = (ViewSwitcher) findViewById(R.id.switcher);
         list = (ListView) findViewById(android.R.id.list);
@@ -182,7 +182,6 @@ public class Main extends TaskActivityCompat implements Task.Callback {
             return convertView;
         }
 
-
         @Override
         public void onClick(View v) {
             v.getContext().startActivity((Intent) v.getTag());
@@ -198,8 +197,8 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         public Demo(Context context, int titleResId, int descriptionResId, String uri, Intent intent){
             this.intentStart = intent;
             this.intentView = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NeoTech-Software/Android-Retainable-Tasks/tree/master/demo/src/main/java/" + uri));
-            this.title = ExtendedHtml.fromHtml(context.getString(titleResId));
-            this.description = ExtendedHtml.fromHtml(context.getString(descriptionResId));
+            this.title = ExtendedHtml.fromHtml(context.getString(titleResId), ExtendedHtml.FROM_HTML_MODE_LEGACY);
+            this.description = ExtendedHtml.fromHtml(context.getString(descriptionResId), ExtendedHtml.FROM_HTML_MODE_LEGACY);
         }
     }
 }

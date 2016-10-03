@@ -24,7 +24,8 @@ public final class BaseTaskManager extends TaskManager {
     private static final String TAG = "BaseTaskManager";
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
-    protected UIStateProvider uiStateProvider = null;
+
+    protected boolean isUIReady = true;
 
     @Override
     public Task<?, ?> getTask(@NonNull String tag) {
@@ -138,7 +139,7 @@ public final class BaseTaskManager extends TaskManager {
             throw new IllegalStateException("Task with an equal tag: '" + task.getTag() + "' has already been added and is currently running or finishing.");
         }
         tasks.put(task.getTag(), task);
-        if(uiStateProvider == null || uiStateProvider.isUserInterfaceReady() ){
+        if(isUIReady){
             task.setCallback(new CallbackShadow(callback));
         } else {
             task.removeCallback();
@@ -159,7 +160,7 @@ public final class BaseTaskManager extends TaskManager {
     @Override
     @MainThread
     public boolean isRunning(@NonNull String tag) {
-        if(TaskManager.isStrictDebugModeEnabled()){
+        if (TaskManager.isStrictDebugModeEnabled()) {
             assertMainThread();
         }
         Task task = tasks.get(tag);
@@ -230,12 +231,8 @@ public final class BaseTaskManager extends TaskManager {
         tasks.remove(expectedTask.getTag());
     }
 
-    public void setUIStateProvider(UIStateProvider uiStateProvider){
-        this.uiStateProvider = uiStateProvider;
-    }
-
-    public interface UIStateProvider {
-        boolean isUserInterfaceReady();
+    public void setUIReady(boolean isReady){
+        this.isUIReady = isReady;
     }
 
     private final class CallbackShadow implements Task.AdvancedCallback  {

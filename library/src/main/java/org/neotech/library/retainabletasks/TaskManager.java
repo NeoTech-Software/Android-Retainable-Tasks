@@ -1,11 +1,13 @@
 package org.neotech.library.retainabletasks;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.os.Build;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
@@ -97,7 +99,8 @@ public abstract class TaskManager {
     /**
      * Checks if the {@link Task} with the given tag has delivered it's result.
      * @param tag The tag which identifies the Task to check.
-     * @return true if the Task did deliver it's result, false if not.
+     * @return true if the Task did deliver it's result, false if the Task did not deliver it's
+     * result or the task is not found using {@link #getTask(String)}.
      * @see Task#isResultDelivered()
      */
     @MainThread
@@ -107,7 +110,7 @@ public abstract class TaskManager {
      * Checks if the {@link Task} with the given tag is running.
      * @param tag The tag which identifies the Task to check.
      * @return true if the Task is running ({@link Task#doInBackground()} is executing), false if
-     * not.
+     * the Task is not running or the task is not found using {@link #getTask(String)}.
      * @see Task#isRunning()
      */
     @MainThread
@@ -151,11 +154,14 @@ public abstract class TaskManager {
     @MainThread
     public static TaskManager getFragmentTaskManager(@NonNull Fragment fragment){
         final String tag = getTaskManagerTag(fragment.getTag());
-        if(fragment.getParentFragment() != null){
-            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getParentFragment().getFragmentManager()), tag);
-        } else {
-            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+
+        //Get the root activity
+        while(fragment.getParentFragment() != null){
+            fragment = fragment.getParentFragment();
         }
+        final FragmentActivity root = fragment.getActivity();
+
+        return getTaskManager(TaskRetainingFragment.getInstance(root.getSupportFragmentManager()), tag);
     }
 
     /**
@@ -170,18 +176,21 @@ public abstract class TaskManager {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
             return getFragmentTaskManagerAPI17(fragment, tag);
         } else {
-            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getActivity().getFragmentManager()), tag);
         }
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @MainThread
     private static TaskManager getFragmentTaskManagerAPI17(@NonNull android.app.Fragment fragment, String tag){
-        if(fragment.getParentFragment() != null){
-            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getParentFragment().getFragmentManager()), tag);
-        } else {
-            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getFragmentManager()), tag);
+
+        //Get the root activity
+        while(fragment.getParentFragment() != null){
+            fragment = fragment.getParentFragment();
         }
+        final Activity root = fragment.getActivity();
+
+        return getTaskManager(TaskRetainingFragment.getInstance(root.getFragmentManager()), tag);
     }
 
 
