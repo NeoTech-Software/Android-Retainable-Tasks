@@ -54,7 +54,7 @@ public final class TaskManagerLifeCycleProxy {
             return fragmentTaskManager;
         }
         if(provider instanceof FragmentActivity){
-            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((FragmentActivity) provider).getFragmentManager());
+            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((FragmentActivity) provider).getSupportFragmentManager());
         } else if(provider instanceof Fragment){
             fragmentTaskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((Fragment) provider);
         } else if(provider instanceof Activity){
