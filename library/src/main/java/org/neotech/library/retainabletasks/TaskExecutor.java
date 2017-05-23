@@ -41,7 +41,14 @@ public class TaskExecutor {
             MAXIMUM_POOL_SIZE,
             KEEP_ALIVE, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(128),
-            threadFactory);
+            threadFactory){
+
+        @Override
+        protected void beforeExecute(Thread t, Runnable r) {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            super.beforeExecute(t, r);
+        }
+    };
 
     /**
      * An {@link Executor} that can be used to execute tasks in serial. This Executor internally uses the {@link TaskExecutor#THREAD_POOL_EXECUTOR} for executing it's tasks.

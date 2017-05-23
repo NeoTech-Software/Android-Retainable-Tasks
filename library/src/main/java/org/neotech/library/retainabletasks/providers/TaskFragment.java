@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskManager;
 import org.neotech.library.retainabletasks.TaskManagerLifeCycleProxy;
-import org.neotech.library.retainabletasks.TaskManagerProvider;
+import org.neotech.library.retainabletasks.TaskManagerOwner;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ import org.neotech.library.retainabletasks.TaskManagerProvider;
  * @see TaskManagerLifeCycleProxy
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class TaskFragment extends Fragment implements TaskManagerProvider {
+public class TaskFragment extends Fragment implements TaskManagerOwner {
 
     private final TaskManagerLifeCycleProxy proxy = new TaskManagerLifeCycleProxy(this);
 

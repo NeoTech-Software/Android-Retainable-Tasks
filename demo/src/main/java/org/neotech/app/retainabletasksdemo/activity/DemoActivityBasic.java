@@ -22,7 +22,6 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
 
     private static final String TASK_RETAIN_UI_STATE = "retain-ui-state";
     private static final String TASK_PROGRESS = "progress-dialog";
-
     private static final String DIALOG_PROGRESS = "progress-dialog";
 
     private ProgressDialog progressDialog;
@@ -43,15 +42,15 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
     @Override
     public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
         if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
-            /**
-             * the onPreAttach method will only be called if the task did not deliver its result
-             * and thus is still available/referenced by the TaskManger.
-             *
-             * At this point the UI can be restored to the "task is running" state.
+            /*
+              the onPreAttach method will only be called if the task did not deliver its result
+              and thus is still available/referenced by the TaskManger.
+
+              At this point the UI can be restored to the "task is running" state.
              */
             if (!task.isResultDelivered()) { //This call isn't necessary.
                 retainUserInterfaceButton.setEnabled(false);
-                retainUserInterfaceButton.setText("" + task.getLastKnownProgress());
+                retainUserInterfaceButton.setText(String.valueOf(task.getLastKnownProgress()));
             }
         } else if(task.getTag().equals(TASK_PROGRESS)){
             progressDialog = ProgressDialog.getExistingInstance(getSupportFragmentManager(), DIALOG_PROGRESS);
@@ -63,7 +62,7 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
     public void onClick(View v) {
         final int id = v.getId();
         if(id == R.id.button_progress_task) {
-            if (getTaskManager().isRunning(TASK_PROGRESS)) {
+            if (getTaskManager().isActive(TASK_PROGRESS)) {
                 Toast.makeText(this, R.string.toast_task_already_running, Toast.LENGTH_SHORT).show();
             }
             SimpleTask task = new SimpleTask(TASK_PROGRESS);
@@ -110,7 +109,7 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
         if(task.getTag().equals(TASK_PROGRESS)) {
             progressDialog.setProgress((int) progress);
         } else if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
-            retainUserInterfaceButton.setText("" + (int) progress);
+            retainUserInterfaceButton.setText(String.valueOf(progress));
         }
     }
 

@@ -1,5 +1,4 @@
 <manifest package="org.neotech.library.retainabletasks"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk tools:overrideLibrary="android.support.v7.appcompat, android.support.v4.appcompat" />
 </manifest>

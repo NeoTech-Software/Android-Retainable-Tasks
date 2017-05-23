@@ -193,6 +193,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </p>
  */
 public abstract class Task<Progress, Result> {
+
     private static final String TAG = "Task";
 
     private static final int MESSAGE_POST_RESULT = 0x1;
@@ -202,10 +203,9 @@ public abstract class Task<Progress, Result> {
 
     private final FutureTask<Result> mFuture;
 
-    volatile int mStatus = STATUS_PENDING;
+    private volatile int mStatus = STATUS_PENDING;
 
     private final AtomicBoolean mCancelled = new AtomicBoolean();
-    private final AtomicBoolean mTaskInvoked = new AtomicBoolean();
 
     private Callback callback;
     private boolean shouldDeliverResult = false;
@@ -214,9 +214,9 @@ public abstract class Task<Progress, Result> {
     private volatile Result result;
     private volatile Progress lastProgress;
 
-    static final byte STATUS_PENDING = 0;
-    static final byte STATUS_RUNNING = 1;
-    static final byte STATUS_FINISHED = 2;
+    private static final byte STATUS_PENDING = 0;
+    private static final byte STATUS_RUNNING = 1;
+    private static final byte STATUS_FINISHED = 2;
 
     private static Handler getHandler() {
         synchronized (Task.class) {
@@ -239,12 +239,14 @@ public abstract class Task<Progress, Result> {
         this.tag = tag;
         final Callable<Result> mWorker = new Callable<Result>() {
             public Result call() throws Exception {
-                mTaskInvoked.set(true);
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                //mTaskInvoked.set(true);
+                //android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 //noinspection unchecked
                 Result result = doInBackground();
+
+                // Flush any pending messages send to the UI handler (like progress messages)
                 Binder.flushPendingCommands();
-                return postResult(result);
+                return result;
             }
         };
 
@@ -273,10 +275,10 @@ public abstract class Task<Progress, Result> {
     }
 
     private void postResultIfNotInvoked(Result result) {
-        final boolean wasTaskInvoked = mTaskInvoked.get();
-        if (!wasTaskInvoked) {
+        //final boolean wasTaskInvoked = mTaskInvoked.get();
+        //if (!wasTaskInvoked) {
             postResult(result);
-        }
+       //}
     }
 
     private Result postResult(Result result) {

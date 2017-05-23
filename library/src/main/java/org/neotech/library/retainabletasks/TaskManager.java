@@ -1,17 +1,17 @@
 package org.neotech.library.retainabletasks;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.os.Build;
+import android.support.annotation.CheckResult;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 import org.neotech.library.retainabletasks.internal.TaskRetainingFragment;
+import org.neotech.library.retainabletasks.internal.TaskRetainingFragmentLegacy;
+import org.neotech.library.retainabletasks.internal.TaskRetainingFragmentLogicLegacy;
 
 import java.util.concurrent.Executor;
 
@@ -102,8 +102,12 @@ public abstract class TaskManager {
      * @return true if the Task did deliver it's result, false if the Task did not deliver it's
      * result or the task is not found using {@link #getTask(String)}.
      * @see Task#isResultDelivered()
+     * @deprecated Please use {@link #getTask(String)} in combination with
+     * {@link Task#isResultDelivered()} to check whether a task is running.
      */
+    @Deprecated
     @MainThread
+    @CheckResult
     public abstract boolean isResultDelivered(@NonNull String tag);
 
     /**
@@ -112,9 +116,25 @@ public abstract class TaskManager {
      * @return true if the Task is running ({@link Task#doInBackground()} is executing), false if
      * the Task is not running or the task is not found using {@link #getTask(String)}.
      * @see Task#isRunning()
+     * @deprecated Please use {@link #getTask(String)} in combination with {@link Task#isRunning()}
+     * to check whether a task is running.
+     */
+    @Deprecated
+    @MainThread
+    @CheckResult
+    public abstract boolean isRunning(@NonNull String tag);
+
+
+    /**
+     * Get if this TaskManager contains an active {@link Task} for the given tag. A {@link Task} is
+     * considered active if the Task is either waiting to be executed, running or waiting to deliver
+     * it's result. Calling this method is actually the same as calling {@link #getTask(String)}
+     * with a null check.
+     * @param tag The tag which identifies the Task to check.
      */
     @MainThread
-    public abstract boolean isRunning(@NonNull String tag);
+    @CheckResult
+    public abstract boolean isActive(@NonNull String tag);
 
     /**
      * Debug use only. Checks if all {@link Task Tasks} added to this TaskManager have been
@@ -153,15 +173,7 @@ public abstract class TaskManager {
      */
     @MainThread
     public static TaskManager getFragmentTaskManager(@NonNull Fragment fragment){
-        final String tag = getTaskManagerTag(fragment.getTag());
-
-        //Get the root activity
-        while(fragment.getParentFragment() != null){
-            fragment = fragment.getParentFragment();
-        }
-        final FragmentActivity root = fragment.getActivity();
-
-        return getTaskManager(TaskRetainingFragment.getInstance(root.getSupportFragmentManager()), tag);
+        return TaskRetainingFragment.holderFragmentFor(fragment).getTaskManager();
     }
 
     /**
@@ -169,32 +181,13 @@ public abstract class TaskManager {
      * @param fragment The Fragment to get the TaskManager for.
      * @return The TaskManager instance associated with the given Fragment.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @MainThread
     public static TaskManager getFragmentTaskManager(@NonNull android.app.Fragment fragment){
         final String tag = getTaskManagerTag(fragment.getTag());
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-            return getFragmentTaskManagerAPI17(fragment, tag);
-        } else {
-            return getTaskManager(TaskRetainingFragment.getInstance(fragment.getActivity().getFragmentManager()), tag);
-        }
+        return getTaskManager(TaskRetainingFragmentLegacy.holderFragmentFor(fragment), tag);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    @MainThread
-    private static TaskManager getFragmentTaskManagerAPI17(@NonNull android.app.Fragment fragment, String tag){
-
-        //Get the root activity
-        while(fragment.getParentFragment() != null){
-            fragment = fragment.getParentFragment();
-        }
-        final Activity root = fragment.getActivity();
-
-        return getTaskManager(TaskRetainingFragment.getInstance(root.getFragmentManager()), tag);
-    }
-
-
-    private static TaskManager getTaskManager(@NonNull TaskRetainingFragment taskRetainingFragment, @NonNull String tag){
+    private static TaskManager getTaskManager(@NonNull TaskRetainingFragmentLogicLegacy taskRetainingFragment, @NonNull String tag){
         BaseTaskManager manager = (BaseTaskManager) taskRetainingFragment.findTaskManagerByTag(tag);
         if(manager == null){
             manager = new BaseTaskManager();
@@ -210,15 +203,16 @@ public abstract class TaskManager {
         throw new IllegalArgumentException("In order to associate a TaskManger with a Fragment the Fragment needs to have a tag.");
     }
 
+
     /**
      * Returns the {@link TaskManager} associated with the Activity the given FragmentManger belongs to. You
      * should never try to supply a child/Fragment FragmentManger here.
-     * @param manager The FragmentManger of the Activity you would like to get the TaskManager for.
+     * @param activity The Activity you would like to get the TaskManager for.
      * @return The TaskManager instance associated with the given Activity's FragmentManger.
      */
     @MainThread
-    public static TaskManager getActivityTaskManager(@NonNull FragmentManager manager){
-        return TaskRetainingFragment.getInstance(manager).getActivityTaskManager();
+    public static TaskManager getActivityTaskManager(@NonNull FragmentActivity activity){
+        return TaskRetainingFragment.holderFragmentFor(activity).getTaskManager();
     }
 
     /**
@@ -228,8 +222,8 @@ public abstract class TaskManager {
      * @return The TaskManager instance associated with the given Activity's FragmentManger.
      */
     @MainThread
-    public static TaskManager getActivityTaskManager(@NonNull android.app.FragmentManager manager){
-        return TaskRetainingFragment.getInstance(manager).getActivityTaskManager();
+    public static TaskManager getActivityTaskManager(@NonNull Activity manager){
+        return TaskRetainingFragmentLegacy.holderFragmentFor(manager).getTaskManager();
     }
 
     /**
@@ -240,7 +234,7 @@ public abstract class TaskManager {
      * Good use cases for the global TaskManager are Tasks which don't necessarily need to update
      * the UI. But in most cases you really want to use the Activity TaskManager.
      * @return The global TaskManager instance.
-     * @see TaskManager#getActivityTaskManager(FragmentManager)
+     * @see TaskManager#getActivityTaskManager(Activity)
      */
     public static TaskManager getGlobalTaskManager(){
         /**

@@ -104,7 +104,7 @@ public class DemoActivitySerial extends TaskActivityCompat implements View.OnCli
         button.setEnabled(false);
         final Integer progress = (Integer) task.getLastKnownProgress();
         if (progress != null) {
-            button.setText("" + progress);
+            button.setText(String.valueOf(progress));
         }
     }
 

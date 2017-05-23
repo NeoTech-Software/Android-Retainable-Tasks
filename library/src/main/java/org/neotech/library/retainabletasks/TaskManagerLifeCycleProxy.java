@@ -2,6 +2,9 @@ package org.neotech.library.retainabletasks;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.os.Build;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -13,26 +16,20 @@ import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 /**
  * Created by Rolf on 3-3-2016.
  */
-public final class TaskManagerLifeCycleProxy {
+public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
 
     private BaseTaskManager fragmentTaskManager;
-    private final TaskManagerProvider provider;
+    private final TaskManagerOwner provider;
     private boolean uiReady = false;
 
-    public TaskManagerLifeCycleProxy(@NonNull TaskManagerProvider provider){
-        if(!(provider instanceof Activity || provider instanceof Fragment || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && provider instanceof android.app.Fragment))){
+    public TaskManagerLifeCycleProxy(@NonNull TaskManagerOwner provider){
+        if(!(provider instanceof FragmentActivity || provider instanceof Activity || provider instanceof Fragment || provider instanceof android.app.Fragment)){
             throw new IllegalArgumentException("The TaskManagerProvider needs to be an instance of android.app.Activity (including the derived support library activities), android.app.Fragment or android.support.v4.app.Fragment!");
-
-            /**
-             * Checks if the given provider is not an instance of the support library Activity or Fragment and if the API version is lower than API 11.
-             * If so it should throw an exception as on API 11 or below we don't have access to Fragments.
-             */
-        } else if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB && !(provider instanceof FragmentActivity || provider instanceof Fragment)){
-            throw new IllegalArgumentException("This library doesn't support API level 11 or lower with the default android.app.Activity or android.app.Fragment class, you should use the android.support.v4.app.FragmentActivity or android.support.v4.app.Fragment!");
         }
         this.provider = provider;
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
     @MainThread
     public void onStart(){
         uiReady = true;
@@ -40,6 +37,7 @@ public final class TaskManagerLifeCycleProxy {
         ((BaseTaskManager) getTaskManager()).attach(provider);
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     @MainThread
     public void onStop(){
         uiReady = false;
@@ -54,12 +52,12 @@ public final class TaskManagerLifeCycleProxy {
             return fragmentTaskManager;
         }
         if(provider instanceof FragmentActivity){
-            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((FragmentActivity) provider).getSupportFragmentManager());
+            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager((FragmentActivity) provider);
         } else if(provider instanceof Fragment){
             fragmentTaskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((Fragment) provider);
         } else if(provider instanceof Activity){
-            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager(((Activity) provider).getFragmentManager());
-        } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && provider instanceof android.app.Fragment){
+            fragmentTaskManager = (BaseTaskManager) TaskManager.getActivityTaskManager((Activity) provider);
+        } else if(provider instanceof android.app.Fragment){
             fragmentTaskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((android.app.Fragment) provider);
         } /* else {
             //This should never happen as the constructor checks everything.

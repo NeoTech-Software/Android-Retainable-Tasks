@@ -1,32 +1,26 @@
 package org.neotech.library.retainabletasks.internal;
 
-import android.os.Bundle;
+import android.app.Activity;
+import android.app.Fragment;
 import android.support.annotation.RestrictTo;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 
-import org.neotech.library.retainabletasks.internal.utilities.HolderFragmentManager;
+import org.neotech.library.retainabletasks.internal.utilities.HolderFragmentManagerLegacy;
 
 /**
  * Created by Rolf on 29-2-2016.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public final class TaskRetainingFragment extends Fragment {
+public final class TaskRetainingFragmentLegacy extends Fragment {
 
     public static final String FRAGMENT_TAG = "org.neotech.library.retainabletasks.TaskRetainingFragment";
 
-    private static final HolderFragmentManager<TaskRetainingFragment> sHolderFragmentManager = new HolderFragmentManager<>(TaskRetainingFragment.class, FRAGMENT_TAG);
+    private static final HolderFragmentManagerLegacy<TaskRetainingFragmentLegacy> sHolderFragmentManager = new HolderFragmentManagerLegacy<>(TaskRetainingFragmentLegacy.class, FRAGMENT_TAG);
 
-    final TaskRetainingFragmentLogic logic = new TaskRetainingFragmentLogic();
 
-    public TaskRetainingFragment(){
+    final TaskRetainingFragmentLogicLegacy logic = new TaskRetainingFragmentLogicLegacy();
+
+    public TaskRetainingFragmentLegacy(){
         setRetainInstance(true);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        sHolderFragmentManager.onHolderFragmentCreated(this);
     }
 
     @Override
@@ -43,15 +37,15 @@ public final class TaskRetainingFragment extends Fragment {
          * The activity is destroyed, this method WON'T be called when the fragment is being
          * propagated between activity instances.
          */
-        //logic.assertFragmentTasksAreDetached();
+        logic.assertFragmentTasksAreDetached();
         super.onDestroy();
     }
 
-    public static TaskRetainingFragmentLogic holderFragmentFor(FragmentActivity activity) {
+    public static TaskRetainingFragmentLogicLegacy holderFragmentFor(Activity activity) {
         return sHolderFragmentManager.retainableFragmentFor(activity).logic;
     }
 
-    public static TaskRetainingFragmentLogic holderFragmentFor(Fragment fragment) {
+    public static TaskRetainingFragmentLogicLegacy holderFragmentFor(Fragment fragment) {
         return sHolderFragmentManager.retainableFragmentFor(fragment).logic;
     }
 }

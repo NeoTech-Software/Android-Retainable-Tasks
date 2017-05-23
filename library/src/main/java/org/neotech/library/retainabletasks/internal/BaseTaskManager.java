@@ -3,13 +3,14 @@ package org.neotech.library.retainabletasks.internal;
 import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 import android.util.Pair;
 
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskExecutor;
 import org.neotech.library.retainabletasks.TaskManager;
-import org.neotech.library.retainabletasks.TaskManagerProvider;
+import org.neotech.library.retainabletasks.TaskManagerOwner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,12 +20,12 @@ import java.util.concurrent.Executor;
 /**
  * Created by Rolf on 29-2-2016.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class BaseTaskManager extends TaskManager {
 
     private static final String TAG = "BaseTaskManager";
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
-
     protected boolean isUIReady = true;
 
     @Override
@@ -32,7 +33,7 @@ public final class BaseTaskManager extends TaskManager {
         return tasks.get(tag);
     }
 
-    public void attach(TaskManagerProvider taskManagerProvider){
+    public void attach(TaskManagerOwner taskManagerOwner){
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();
         }
@@ -50,7 +51,7 @@ public final class BaseTaskManager extends TaskManager {
         final ArrayList<Pair<Task<?, ?>, Task.Callback>> attachQueue = new ArrayList<>(tasks.size());
 
         for (Map.Entry<String, Task<?, ?>> task : tasks.entrySet()) {
-            Task.Callback callback = taskManagerProvider.onPreAttach(task.getValue());
+            Task.Callback callback = taskManagerOwner.onPreAttach(task.getValue());
             if (callback == null) {
                 throw new IllegalArgumentException("Could not attach Task '" + task.getKey() + "' because onPreAttach did not return a valid Callback listener! Did you override onPreAttach()?");
             }
@@ -145,6 +146,16 @@ public final class BaseTaskManager extends TaskManager {
             task.removeCallback();
         }
         TaskExecutor.executeOnExecutor(task, executor);
+    }
+
+
+    @Override
+    @MainThread
+    public boolean isActive(@NonNull String tag) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
+        return tasks.get(tag) != null;
     }
 
     @Override

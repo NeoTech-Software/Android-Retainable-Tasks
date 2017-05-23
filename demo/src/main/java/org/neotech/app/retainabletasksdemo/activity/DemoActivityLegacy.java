@@ -16,7 +16,7 @@ import org.neotech.library.retainabletasks.providers.TaskActivity;
 /**
  * Created by Rolf on 4-3-2016.
  */
-public class DemoActivityV11 extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback {
+public class DemoActivityLegacy extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback {
 
     private static final String TASK_COUNT_DOWN = "count-down";
     private Button button;
@@ -37,7 +37,7 @@ public class DemoActivityV11 extends TaskActivity implements View.OnClickListene
     @Override
     public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
         button.setEnabled(false);
-        button.setText("" + task.getLastKnownProgress());
+        button.setText(String.valueOf(task.getLastKnownProgress()));
         return this;
     }
 
@@ -66,6 +66,6 @@ public class DemoActivityV11 extends TaskActivity implements View.OnClickListene
 
     @Override
     public void onProgressUpdate(Task<?, ?> task, Object progress) {
-        button.setText("" + (int) progress);
+        button.setText(String.valueOf(progress));
     }
 }

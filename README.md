@@ -6,10 +6,10 @@ Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous ba
 
 *Key features:*
 
- - Light weight
+ - Light weight & Simple API
  - Same Task API on all Android versions, based on the Marshmallow AsyncTask implementation.
- - Simple API
- - Supports API 8+ <sub>(or 11+ if you not use the support library based classes)</sub>
+ - Supports the [LifecycleObserver](https://developer.android.com/reference/android/arch/lifecycle/LifecycleObserver.html) class from the [Android Architecture Lifecycle](https://developer.android.com/reference/android/arch/lifecycle/Lifecycle.html) library;
+ - Supports API 14+ <sub>(with or without the Android support libraries)</sub>
 
 **Add it to your project**
 
@@ -17,7 +17,7 @@ Android-Retainable-Tasks is available on jCenter, just add the following compile
 
 ```groovy
 dependencies {
-    compile 'org.neotech.library:android-retainable-tasks:0.2.5'
+    compile 'org.neotech.library:android-retainable-tasks:1.0.0-alpha-1'
 }
 ```
 
@@ -29,13 +29,9 @@ dependencies {
 4. [FAQ](#4-faq)
 5. [ToDo](#5-to-do)
 
->**Why use this library?**
-
->*Always! its awesome!!!*
-
->This library is useful if you need to do stuff in the background which is heavily bound to the user-interface, like: Refreshing large lists from a database, loading an article from a network source or decoding an image. You need to use an additional library if you need: task scheduling, automatic retries, task persistence across reboots, task constrains (network availability) etc.
-
-
+>**Why use this library?**  
+>*Always! its awesome!*  
+>No, obviously you should not always use this library. This library is useful when you need to do stuff in the background which is heavily bound to the user-interface, like: Refreshing large lists from a database, loading an article from a network source or decoding an image, all those things are quit tightly bound to the user-interface. You need to use an additional library if you need: task scheduling, automatic retries, task persistence across reboots, task constrains (network availability) etc.
 
 
 ## 1. Basic usage
@@ -218,10 +214,10 @@ TaskExecutor.executeOnExecutor(new ExampleTask(), yourExecutor);
 ####**Using the TaskManagerLifeCycleProxy to mimic the TaskActivity**
 If you already use some custom Activity or Fragment implementation you might not be able to use the `TaskActivity` or `TaskFragment` class. To overcome this problem you can implement the behaviour of the `TaskActivity` yourself using the `TaskManagerLifeCycleProxy` class.
 
-Create a new `TaskManagerLifeCycleProxy` instance and let your Activity (or Fragment) implement the `TaskManagerProvider` interface. Override the`onStart()` and `onStop()` methods and proxy those together with the `getTaskManager()` method  to the `TaskManagerLifeCycleProxy` instance.
+Create a new `TaskManagerLifeCycleProxy` instance and let your Activity (or Fragment) implement the `TaskManagerOwner` interface. Override the`onStart()` and `onStop()` methods and proxy those together with the `getTaskManager()` method  to the `TaskManagerLifeCycleProxy` instance.
 
 ```java
-public class MyBaseActivity extends SomeActivity implements TaskManagerProvider {
+public class MyBaseActivity extends SomeActivity implements TaskManagerOwner {
 
     private TaskManagerLifeCycleProxy proxy = new TaskManagerLifeCycleProxy(this);
 

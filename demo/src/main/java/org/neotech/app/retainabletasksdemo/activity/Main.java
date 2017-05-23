@@ -6,9 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,7 +42,7 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         vSwitcher = (ViewSwitcher) findViewById(R.id.switcher);
         list = (ListView) findViewById(android.R.id.list);
 
-        if(!getTaskManager().isRunning("list-loader")) {
+        if(!getTaskManager().isActive("list-loader")) {
             getTaskManager().execute(new UselessLoadingTask("list-loader", this), this);
         }
     }
@@ -109,7 +106,7 @@ public class Main extends TaskActivityCompat implements Task.Callback {
             demos.add(new Demo(context, R.string.demo_examples_title, R.string.demo_examples_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityBasic.java", new Intent(context, DemoActivityBasic.class)));
             demos.add(new Demo(context, R.string.demo_serial_title, R.string.demo_serial_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivitySerial.java", new Intent(context, DemoActivitySerial.class)));
             demos.add(new Demo(context, R.string.demo_fragments_title, R.string.demo_fragments_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityFragments.java", new Intent(context, DemoActivityFragments.class)));
-            demos.add(new Demo(context, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(context, DemoActivityV11.class)));
+            demos.add(new Demo(context, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(context, DemoActivityLegacy.class)));
             return demos;
         }
     }
