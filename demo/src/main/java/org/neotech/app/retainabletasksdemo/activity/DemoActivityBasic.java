@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -16,6 +17,8 @@ import org.neotech.app.retainabletasksdemo.tasks.SimpleTask;
 import org.neotech.app.retainabletasksdemo.tasks.TaskWithoutCallback;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskExecutor;
+import org.neotech.library.retainabletasks.TaskState;
+import org.neotech.library.retainabletasks.TaskTarget;
 import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
 public class DemoActivityBasic extends TaskActivityCompat implements View.OnClickListener, Task.AdvancedCallback, OnAlertDialogClickListener {
@@ -66,14 +69,14 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
                 Toast.makeText(this, R.string.toast_task_already_running, Toast.LENGTH_SHORT).show();
             }
             SimpleTask task = new SimpleTask(TASK_PROGRESS);
-            getTaskManager().execute(task, this);
+            getTaskManager().execute(task);
 
         } else if(id == R.id.button_no_ui_task){
             TaskWithoutCallback task = new TaskWithoutCallback(this);
             TaskExecutor.execute(task);
         } else if(id == R.id.button_retain_ui_state_task){
             CountDownTask task = new CountDownTask(TASK_RETAIN_UI_STATE, 10);
-            getTaskManager().execute(task, this);
+            getTaskManager().execute(task);
             retainUserInterfaceButton.setEnabled(false);
         }
     }
@@ -85,14 +88,28 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
         }
     }
 
+    @TaskTarget(value = TaskState.POST, taskIds = TASK_RETAIN_UI_STATE)
+    public void onPostExecuteAnnotated(Task<?, ?> task){
+        Log.d("Test", "onPostExecuteAnnotated(" + task + ")");
+        retainUserInterfaceButton.setEnabled(true);
+        retainUserInterfaceButton.setText(R.string.task_retain_ui_state);
+    }
+
+    @TaskTarget(value = TaskState.PROGRESS, taskIds = TASK_RETAIN_UI_STATE)
+    public void onProgressUpdateAnnotated(Task<?, ?> task, Object progress){
+        Log.d("Test", "onProgressUpdateAnnotated(" + task + ")");
+        retainUserInterfaceButton.setText(String.valueOf(progress));
+    }
+
+
     @Override
     public void onPostExecute(Task<?, ?> task) {
         if(task.getTag().equals(TASK_PROGRESS)) {
             progressDialog.dismiss();
             Snackbar.make(findViewById(android.R.id.content), getString(R.string.toast_task_finished, getString(R.string.task_progress_dialog)), Snackbar.LENGTH_LONG).show();
         } else if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
-            retainUserInterfaceButton.setEnabled(true);
-            retainUserInterfaceButton.setText(R.string.task_retain_ui_state);
+            //retainUserInterfaceButton.setEnabled(true);
+            //retainUserInterfaceButton.setText(R.string.task_retain_ui_state);
         }
     }
 

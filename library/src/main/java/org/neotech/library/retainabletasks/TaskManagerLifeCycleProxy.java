@@ -10,8 +10,12 @@ import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by Rolf on 3-3-2016.
@@ -19,14 +23,51 @@ import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
 
     private BaseTaskManager fragmentTaskManager;
+    private final TaskManagerOwner proxiedProvider;
     private final TaskManagerOwner provider;
     private boolean uiReady = false;
+    private TaskManager.TaskAttachListener generatedCodeTarget;
 
-    public TaskManagerLifeCycleProxy(@NonNull TaskManagerOwner provider){
+    public TaskManagerLifeCycleProxy(@NonNull final TaskManagerOwner provider){
         if(!(provider instanceof FragmentActivity || provider instanceof Activity || provider instanceof Fragment || provider instanceof android.app.Fragment)){
             throw new IllegalArgumentException("The TaskManagerProvider needs to be an instance of android.app.Activity (including the derived support library activities), android.app.Fragment or android.support.v4.app.Fragment!");
         }
         this.provider = provider;
+
+        try {
+            Class classType = Class.forName(provider.getClass().getName() + "_TaskBinding");
+            Constructor test = classType.getConstructor(provider.getClass());
+            generatedCodeTarget = (TaskManager.TaskAttachListener) test.newInstance(provider);
+
+            Log.d("Test", "classType: " + classType);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+
+        this.proxiedProvider = new TaskManagerOwner() {
+            @Override
+            public TaskManager getTaskManager() {
+                return provider.getTaskManager();
+            }
+
+            @Override
+            public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+                if(generatedCodeTarget != null){
+                    return generatedCodeTarget.onPreAttach(task);
+                }
+                //throw new IllegalStateException("Executing task without")
+                return provider.onPreAttach(task);
+            }
+        };
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -34,7 +75,7 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
     public void onStart(){
         uiReady = true;
         ((BaseTaskManager) getTaskManager()).setUIReady(uiReady);
-        ((BaseTaskManager) getTaskManager()).attach(provider);
+        ((BaseTaskManager) getTaskManager()).attach(proxiedProvider);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -63,6 +104,7 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
             //This should never happen as the constructor checks everything.
         }
         */
+        fragmentTaskManager.setDefaultTaskAttachListener(proxiedProvider);
         fragmentTaskManager.setUIReady(uiReady);
         return fragmentTaskManager;
     }

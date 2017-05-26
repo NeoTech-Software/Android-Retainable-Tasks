@@ -27,13 +27,18 @@ public final class BaseTaskManager extends TaskManager {
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
     protected boolean isUIReady = true;
+    protected TaskManager.TaskAttachListener attachListener;
+
+    public void setDefaultTaskAttachListener(TaskManager.TaskAttachListener attachListener){
+        this.attachListener = attachListener;
+    }
 
     @Override
     public Task<?, ?> getTask(@NonNull String tag) {
         return tasks.get(tag);
     }
 
-    public void attach(TaskManagerOwner taskManagerOwner){
+    public void attach(TaskAttachListener taskManagerOwner){
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();
         }
@@ -124,13 +129,25 @@ public final class BaseTaskManager extends TaskManager {
         }
     }
 
+    @MainThread
+    public <Progress, Result> void execute(@NonNull Task<Progress, Result> task){
+        execute(task, attachListener.onPreAttach(task), TaskExecutor.getDefaultExecutor());
+    }
+
+    @MainThread
+    public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Executor executor){
+        execute(task, attachListener.onPreAttach(task), executor);
+    }
+
     @Override
     @MainThread
+    @Deprecated
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback){
         execute(task, callback, TaskExecutor.getDefaultExecutor());
     }
 
     @Override
+    @Deprecated
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor) {
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();

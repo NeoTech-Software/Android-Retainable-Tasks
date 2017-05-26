@@ -1,0 +1,13 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(':annotations')
+    compile 'com.squareup:javapoet:1.9.0'
+    compile 'com.google.auto:auto-common:0.6'
+    compile project(':library')
+    compile project(path: ':library')
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7

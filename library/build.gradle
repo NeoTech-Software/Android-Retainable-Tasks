@@ -57,14 +57,13 @@ configurations {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    compile "android.arch.lifecycle:extensions:1.0.0-alpha1"
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'android.arch.lifecycle:extensions:1.0.0-alpha1'
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
-
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.3.1'
     javadocCompile 'com.android.support:appcompat-v7:25.3.1'
+    compile project(':annotations')
 }
 
 apply from: 'publish-library.gradle'

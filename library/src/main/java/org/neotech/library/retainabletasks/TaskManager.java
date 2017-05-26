@@ -73,6 +73,27 @@ public abstract class TaskManager {
     public abstract Task<?, ?> cancel(@NonNull String tag);
 
     /**
+     * Start the given task on the default Executor ({@link TaskExecutor#getDefaultExecutor()}). The
+     * Task life-cycle events will be delivered to the class owning ({@link TaskManagerOwner}) this
+     * {@link TaskManager}.
+     *
+     * @param task The Task to execute.
+     * @see TaskExecutor#setDefaultExecutor(Executor)
+     */
+    @MainThread
+    public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task);
+
+    /**
+     * Start the given task on the given {@link Executor}. The Task life-cycle events will be
+     * delivered to the class owning ({@link TaskManagerOwner}) this {@link TaskManager}.
+     *
+     * @param task The Task to execute.
+     * @param executor The Executor to execute the given Task with.
+     */
+    @MainThread
+    public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Executor executor);
+
+    /**
      * Start the given task on the default Executor
      * ({@link TaskExecutor#getDefaultExecutor()}). The Task life-cycle events will be delivered to
      * the given {@link Task.Callback} listener.
@@ -80,8 +101,11 @@ public abstract class TaskManager {
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
      * @see TaskExecutor#setDefaultExecutor(Executor)
+     * @deprecated This method has been deprecated, please use {@link #execute(Task)} instead which
+     * supports annotation based Task life-cycle callbacks.
      */
     @MainThread
+    @Deprecated
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback);
 
     /**
@@ -92,8 +116,11 @@ public abstract class TaskManager {
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
      * @param executor The Executor to execute the given Task with.
+     * @deprecated This method has been deprecated, please use {@link #execute(Task, Executor)}
+     * instead which supports annotation based Task life-cycle callbacks.
      */
     @MainThread
+    @Deprecated
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor);
 
     /**
