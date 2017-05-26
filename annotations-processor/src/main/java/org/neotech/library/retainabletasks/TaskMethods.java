@@ -12,4 +12,5 @@ public class TaskMethods {
     public Element progressUpdate = null;
     public Element cancel = null;
     public Element reattach = null;
+    public Element attach = null;
 }

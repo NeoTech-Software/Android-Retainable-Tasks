@@ -3,7 +3,6 @@ package org.neotech.library.retainabletasks;
 import java.util.HashMap;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 
 /**
  * Created by Rolf Smit on 24-May-17.
@@ -35,32 +34,43 @@ public class TaskBinding {
 
             switch (target.value()){
                 case POST:
-                    assertIsNotSet(methods.postExecute);
+                    assertIsNotSet(methods.postExecute, tag);
                     methods.postExecute = element;
                     break;
                 case PRE:
-                    assertIsNotSet(methods.preExecute);
+                    assertIsNotSet(methods.preExecute, tag);
                     methods.preExecute = element;
                     break;
                 case PROGRESS:
-                    assertIsNotSet(methods.progressUpdate);
+                    assertIsNotSet(methods.progressUpdate, tag);
                     methods.progressUpdate = element;
                     break;
                 case CANCELED:
-                    assertIsNotSet(methods.cancel);
+                    assertIsNotSet(methods.cancel, tag);
                     methods.cancel = element;
                     break;
+                case ATTACH:
+                    assertIsNotSet(methods.attach, tag);
+                    methods.attach = element;
+                    break;
                 case REATTACH:
-                    assertIsNotSet(methods.reattach);
+                    assertIsNotSet(methods.reattach, tag);
                     methods.reattach = element;
+                    break;
+                case ATTACH_ANY:
+                    assertIsNotSet(methods.attach, tag);
+                    methods.attach = element;
+                    assertIsNotSet(methods.reattach, tag);
+                    methods.reattach = element;
+
             }
         }
     }
 
 
-    private void assertIsNotSet(Element element){
+    private void assertIsNotSet(Element element, String tag){
         if(element != null){
-            throw new IllegalArgumentException("Double annotated postExecute method found for task with tag %s!");
+            throw new IllegalArgumentException(String.format("Double annotated %s method found for task with tag %s!", element.getSimpleName(), tag));
         }
     }
 

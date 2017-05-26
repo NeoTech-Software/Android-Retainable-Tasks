@@ -17,7 +17,7 @@ import org.neotech.app.retainabletasksdemo.tasks.SimpleTask;
 import org.neotech.app.retainabletasksdemo.tasks.TaskWithoutCallback;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskExecutor;
-import org.neotech.library.retainabletasks.TaskState;
+import org.neotech.library.retainabletasks.State;
 import org.neotech.library.retainabletasks.TaskTarget;
 import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
@@ -40,6 +40,11 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
 
         retainUserInterfaceButton = (Button) findViewById(R.id.button_retain_ui_state_task);
         retainUserInterfaceButton.setOnClickListener(this);
+
+        if(savedInstanceState == null) {
+            CountDownTask task = new CountDownTask(TASK_RETAIN_UI_STATE, 10);
+            getTaskManager().execute(task);
+        }
     }
 
     @Override
@@ -88,14 +93,31 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
         }
     }
 
-    @TaskTarget(value = TaskState.POST, taskIds = TASK_RETAIN_UI_STATE)
+    @TaskTarget(value = State.ATTACH, taskIds = TASK_RETAIN_UI_STATE)
+    public void onAttach(Task<?, ?> task){
+        retainUserInterfaceButton.setEnabled(false);
+    }
+
+    @TaskTarget(value = State.REATTACH, taskIds = TASK_RETAIN_UI_STATE)
+    public void onReAttach(Task<?, ?> task){
+        retainUserInterfaceButton.setEnabled(false);
+        retainUserInterfaceButton.setText(String.valueOf(task.getLastKnownProgress()));
+    }
+
+    @TaskTarget(value = State.PRE, taskIds = TASK_RETAIN_UI_STATE)
+    public void onPreExecuteAnnotated(Task<?, ?> task){
+        Log.d("Test", "onPreExecuteAnnotated(" + task + ")");
+        retainUserInterfaceButton.setEnabled(false);
+    }
+
+    @TaskTarget(value = State.POST, taskIds = TASK_RETAIN_UI_STATE)
     public void onPostExecuteAnnotated(Task<?, ?> task){
         Log.d("Test", "onPostExecuteAnnotated(" + task + ")");
         retainUserInterfaceButton.setEnabled(true);
         retainUserInterfaceButton.setText(R.string.task_retain_ui_state);
     }
 
-    @TaskTarget(value = TaskState.PROGRESS, taskIds = TASK_RETAIN_UI_STATE)
+    @TaskTarget(value = State.PROGRESS, taskIds = TASK_RETAIN_UI_STATE)
     public void onProgressUpdateAnnotated(Task<?, ?> task, Object progress){
         Log.d("Test", "onProgressUpdateAnnotated(" + task + ")");
         retainUserInterfaceButton.setText(String.valueOf(progress));

@@ -34,7 +34,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
     private static final String LIBRARY_PACKAGE = "org.neotech.library.retainabletasks";
 
-    private static final ClassName CLASS_TASKMANAGER_TASKATTACHLISTENER = ClassName.get(LIBRARY_PACKAGE, "TaskManager").nestedClass("TaskAttachListener");
+    private static final ClassName CLASS_TASKATTACHBINDING = ClassName.get(LIBRARY_PACKAGE + ".internal", "TaskAttachBinding");
     private static final ClassName CLASS_TASK = ClassName.get(LIBRARY_PACKAGE, "Task");
     private static final ClassName CLASS_TASK_CALLBACK = CLASS_TASK.nestedClass("Callback");
     private static final ClassName CLASS_TASK_ADVANCEDCALLBACK = CLASS_TASK.nestedClass("AdvancedCallback");
@@ -43,8 +43,9 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
 
     private static MethodSpec.Builder createOnPreAttachMethod(){
-       return MethodSpec.methodBuilder("onPreAttach")
+       return MethodSpec.methodBuilder("getListenerFor")
                 .addParameter(CLASS_TASK, "task")
+               .addParameter(TypeName.BOOLEAN, "isReAttach")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(CLASS_TASK_CALLBACK)
                 .addAnnotation(Override.class);
@@ -198,8 +199,18 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
 
             if(methods.reattach != null) {
+                onPreAttachMethod.beginControlFlow("if(isReAttach)");
                 onPreAttachMethod.addStatement("target.$L(task)", methods.reattach.getSimpleName());
             }
+            if(methods.reattach != null && methods.attach != null){
+                onPreAttachMethod.nextControlFlow("else");
+                onPreAttachMethod.addStatement("target.$L(task)", methods.attach.getSimpleName());
+                onPreAttachMethod.endControlFlow();
+            } else if(methods.reattach != null){
+                onPreAttachMethod.endControlFlow();
+            }
+
+
             onPreAttachMethod.addStatement("return $L", callbackImplementation.build());
 
 
@@ -254,7 +265,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 .addField(TypeVariableName.get("T"), "target", Modifier.FINAL)
                 .addMethod(constructor)
                 .addTypeVariable(TypeVariableName.get("T", TypeName.get(typeMirror), CLASS_TASKMANAGEROWNER))
-                .addSuperinterface(CLASS_TASKMANAGER_TASKATTACHLISTENER)
+                .addSuperinterface(CLASS_TASKATTACHBINDING)
                 .addMethod(onPreAttachMethod.build())
                 .build();
 

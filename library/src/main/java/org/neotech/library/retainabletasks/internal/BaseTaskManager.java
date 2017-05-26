@@ -27,10 +27,10 @@ public final class BaseTaskManager extends TaskManager {
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
     protected boolean isUIReady = true;
-    protected TaskManager.TaskAttachListener attachListener;
+    protected TaskManager.TaskAttachListener defaultCallbackProvider;
 
-    public void setDefaultTaskAttachListener(TaskManager.TaskAttachListener attachListener){
-        this.attachListener = attachListener;
+    public void setDefaultCallbackProvider(TaskManager.TaskAttachListener defaultCallbackProvider){
+        this.defaultCallbackProvider = defaultCallbackProvider;
     }
 
     @Override
@@ -131,12 +131,12 @@ public final class BaseTaskManager extends TaskManager {
 
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task){
-        execute(task, attachListener.onPreAttach(task), TaskExecutor.getDefaultExecutor());
+        execute(task, defaultCallbackProvider.onPreAttach(task), TaskExecutor.getDefaultExecutor());
     }
 
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Executor executor){
-        execute(task, attachListener.onPreAttach(task), executor);
+        execute(task, defaultCallbackProvider.onPreAttach(task), executor);
     }
 
     @Override
@@ -267,7 +267,7 @@ public final class BaseTaskManager extends TaskManager {
 
         private final Task.Callback callback;
 
-        public CallbackShadow(Task.Callback callback) {
+        CallbackShadow(Task.Callback callback) {
             this.callback = callback;
         }
 

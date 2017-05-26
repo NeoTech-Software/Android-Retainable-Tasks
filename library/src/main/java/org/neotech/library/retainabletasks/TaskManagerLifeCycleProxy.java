@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
+import org.neotech.library.retainabletasks.internal.TaskAttachBinding;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -23,10 +24,32 @@ import java.lang.reflect.InvocationTargetException;
 public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
 
     private BaseTaskManager fragmentTaskManager;
-    private final TaskManagerOwner proxiedProvider;
+
+    private final TaskManager.TaskAttachListener attachListener = new TaskManager.TaskAttachListener() {
+        @Override
+        public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+            if(generatedCodeTarget != null){
+                return generatedCodeTarget.getListenerFor(task, true);
+            }
+            //throw new IllegalStateException("Executing task without")
+            return provider.onPreAttach(task);
+        }
+    };
+
+    private final TaskManager.TaskAttachListener firstAttachListener = new TaskManager.TaskAttachListener() {
+        @Override
+        public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+            if(generatedCodeTarget != null){
+                return generatedCodeTarget.getListenerFor(task, false);
+            }
+            //throw new IllegalStateException("Executing task without")
+            return provider.onPreAttach(task);
+        }
+    };
+
     private final TaskManagerOwner provider;
     private boolean uiReady = false;
-    private TaskManager.TaskAttachListener generatedCodeTarget;
+    private TaskAttachBinding generatedCodeTarget;
 
     public TaskManagerLifeCycleProxy(@NonNull final TaskManagerOwner provider){
         if(!(provider instanceof FragmentActivity || provider instanceof Activity || provider instanceof Fragment || provider instanceof android.app.Fragment)){
@@ -37,7 +60,7 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
         try {
             Class classType = Class.forName(provider.getClass().getName() + "_TaskBinding");
             Constructor test = classType.getConstructor(provider.getClass());
-            generatedCodeTarget = (TaskManager.TaskAttachListener) test.newInstance(provider);
+            generatedCodeTarget = (TaskAttachBinding) test.newInstance(provider);
 
             Log.d("Test", "classType: " + classType);
         } catch (ClassNotFoundException e) {
@@ -51,23 +74,6 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-
-
-        this.proxiedProvider = new TaskManagerOwner() {
-            @Override
-            public TaskManager getTaskManager() {
-                return provider.getTaskManager();
-            }
-
-            @Override
-            public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
-                if(generatedCodeTarget != null){
-                    return generatedCodeTarget.onPreAttach(task);
-                }
-                //throw new IllegalStateException("Executing task without")
-                return provider.onPreAttach(task);
-            }
-        };
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -75,7 +81,7 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
     public void onStart(){
         uiReady = true;
         ((BaseTaskManager) getTaskManager()).setUIReady(uiReady);
-        ((BaseTaskManager) getTaskManager()).attach(proxiedProvider);
+        ((BaseTaskManager) getTaskManager()).attach(attachListener);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -104,7 +110,7 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
             //This should never happen as the constructor checks everything.
         }
         */
-        fragmentTaskManager.setDefaultTaskAttachListener(proxiedProvider);
+        fragmentTaskManager.setDefaultCallbackProvider(firstAttachListener);
         fragmentTaskManager.setUIReady(uiReady);
         return fragmentTaskManager;
     }
