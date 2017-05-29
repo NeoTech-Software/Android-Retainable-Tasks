@@ -1,13 +1,20 @@
+import org.gradle.internal.jvm.Jvm
+
 apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':annotations')
-    compile 'com.squareup:javapoet:1.9.0'
-    compile 'com.google.auto:auto-common:0.6'
-    compile project(':library')
-    compile project(path: ':library')
-}
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+    // Java Poet to create Java source files
+    compile 'com.squareup:javapoet:1.9.0'
+
+    // For NotNull, Nullable etc. annotations
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // Fix for warning: "bootstrap class path not set in conjunction with -source 1.7"
+    compileOnly files(Jvm.current().getToolsJar())
+}

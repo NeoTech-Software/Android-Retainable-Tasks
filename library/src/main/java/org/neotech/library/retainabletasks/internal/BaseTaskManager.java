@@ -3,6 +3,7 @@ package org.neotech.library.retainabletasks.internal;
 import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 import android.util.Pair;
@@ -12,6 +13,7 @@ import org.neotech.library.retainabletasks.TaskExecutor;
 import org.neotech.library.retainabletasks.TaskManager;
 import org.neotech.library.retainabletasks.TaskManagerOwner;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +28,19 @@ public final class BaseTaskManager extends TaskManager {
     private static final String TAG = "BaseTaskManager";
 
     protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
-    protected boolean isUIReady = true;
-    protected TaskManager.TaskAttachListener defaultCallbackProvider;
+    private boolean isUIReady = true;
+    private WeakReference<TaskManager.TaskAttachListener> defaultCallbackProvider;
 
     public void setDefaultCallbackProvider(TaskManager.TaskAttachListener defaultCallbackProvider){
-        this.defaultCallbackProvider = defaultCallbackProvider;
+        this.defaultCallbackProvider = new WeakReference<>(defaultCallbackProvider);
+    }
+
+    private @NonNull TaskManager.TaskAttachListener getDefaultCallbackProvider() {
+        final TaskManager.TaskAttachListener attachListener = defaultCallbackProvider == null ? null : defaultCallbackProvider.get();
+        if(attachListener == null){
+            throw new IllegalStateException("Cannot call TaskManager.execute() after the TaskManagerOwner (Activity, Fragment etc.) instance has been destroyed!");
+        }
+        return attachListener;
     }
 
     @Override
@@ -131,12 +141,12 @@ public final class BaseTaskManager extends TaskManager {
 
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task){
-        execute(task, defaultCallbackProvider.onPreAttach(task), TaskExecutor.getDefaultExecutor());
+        execute(task, getDefaultCallbackProvider().onPreAttach(task), TaskExecutor.getDefaultExecutor());
     }
 
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Executor executor){
-        execute(task, defaultCallbackProvider.onPreAttach(task), executor);
+        execute(task, getDefaultCallbackProvider().onPreAttach(task), executor);
     }
 
     @Override
@@ -252,11 +262,12 @@ public final class BaseTaskManager extends TaskManager {
     }
 
     private void removeFinishedTask(Task expectedTask){
-        Task task = tasks.get(expectedTask.getTag());
-        if (task != expectedTask) {
+        final Task task = tasks.get(expectedTask.getTag());
+        if (task != null && task != expectedTask) {
             Log.i(TAG, "Task '" + expectedTask.getTag() + "' has already been removed, because another task with the same tag has been added while this task was finishing.");
+        } else {
+            tasks.remove(expectedTask.getTag());
         }
-        tasks.remove(expectedTask.getTag());
     }
 
     public void setUIReady(boolean isReady){

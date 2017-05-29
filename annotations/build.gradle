@@ -1,8 +1,13 @@
-apply plugin: 'java'
+import org.gradle.internal.jvm.Jvm
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-}
+apply plugin: 'java'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Fix for warning: "bootstrap class path not set in conjunction with -source 1.7"
+    compileOnly files(Jvm.current().getToolsJar())
+}

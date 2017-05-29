@@ -1,80 +1,46 @@
 package org.neotech.library.retainabletasks;
 
+import javax.annotation.Nullable;
+
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
 import javax.lang.model.element.Element;
 
 /**
+ * TODO documentation
+ *
  * Created by Rolf Smit on 24-May-17.
  */
+public final class TaskBinding {
 
-public class TaskBinding {
+    private final HashMap<Class<? extends Annotation>, Element> elementForType = new HashMap<>(6);
 
-    private HashMap<String, TaskMethods> methodsPerTask = new HashMap<>();
-
-
-    public TaskBinding(){
-
-    }
-
-    private TaskMethods getTaskMethods(String tag){
-        TaskMethods taskMethods = methodsPerTask.get(tag);
-        if(taskMethods == null){
-            taskMethods = new TaskMethods();
-            methodsPerTask.put(tag, taskMethods);
+    public boolean add(Class<? extends Annotation> annotation, Element element){
+        if(elementForType.containsKey(annotation)){
+            return false;
         }
-        return taskMethods;
+        elementForType.put(annotation, element);
+        return true;
     }
 
-    public void add(Element element){
-        final TaskTarget target = element.getAnnotation(TaskTarget.class);
-
-        for(String tag: target.taskIds()){
-            TaskMethods methods = getTaskMethods(tag);
-
-            switch (target.value()){
-                case POST:
-                    assertIsNotSet(methods.postExecute, tag);
-                    methods.postExecute = element;
-                    break;
-                case PRE:
-                    assertIsNotSet(methods.preExecute, tag);
-                    methods.preExecute = element;
-                    break;
-                case PROGRESS:
-                    assertIsNotSet(methods.progressUpdate, tag);
-                    methods.progressUpdate = element;
-                    break;
-                case CANCELED:
-                    assertIsNotSet(methods.cancel, tag);
-                    methods.cancel = element;
-                    break;
-                case ATTACH:
-                    assertIsNotSet(methods.attach, tag);
-                    methods.attach = element;
-                    break;
-                case REATTACH:
-                    assertIsNotSet(methods.reattach, tag);
-                    methods.reattach = element;
-                    break;
-                case ATTACH_ANY:
-                    assertIsNotSet(methods.attach, tag);
-                    methods.attach = element;
-                    assertIsNotSet(methods.reattach, tag);
-                    methods.reattach = element;
-
-            }
-        }
+    public @Nullable
+    Element getElementForPostExecute(){
+        return elementForType.get(TaskPostExecute.class);
+    }
+    public @Nullable Element getElementForPreExecute(){
+        return elementForType.get(TaskPreExecute.class);
     }
 
-
-    private void assertIsNotSet(Element element, String tag){
-        if(element != null){
-            throw new IllegalArgumentException(String.format("Double annotated %s method found for task with tag %s!", element.getSimpleName(), tag));
-        }
+    public @Nullable Element getElementForCancel(){
+        return elementForType.get(TaskCancel.class);
     }
 
-    public HashMap<String, TaskMethods> getTaskMethods() {
-        return methodsPerTask;
+    public @Nullable Element getElementForProgress(){
+        return elementForType.get(TaskProgress.class);
+    }
+
+    public @Nullable Element getElementForAttach(){
+        return elementForType.get(TaskAttach.class);
     }
 }

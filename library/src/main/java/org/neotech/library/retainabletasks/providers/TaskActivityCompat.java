@@ -50,6 +50,12 @@ public abstract class TaskActivityCompat extends AppCompatActivity implements Ta
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        proxy.onDestroy();
+    }
+
+    @Override
     public final TaskManager getTaskManager() {
         return proxy.getTaskManager();
     }

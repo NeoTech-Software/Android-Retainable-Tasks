@@ -1,26 +1,5 @@
 package org.neotech.library.retainabletasks;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic;
-
-import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -28,9 +7,25 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 
-@SupportedAnnotationTypes("org.neotech.library.retainabletasks.TaskTarget")
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class AnnotationsProcessor extends AbstractProcessor {
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
+
+public final class AnnotationsProcessor extends AbstractProcessor {
 
     private static final String LIBRARY_PACKAGE = "org.neotech.library.retainabletasks";
 
@@ -38,20 +33,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     private static final ClassName CLASS_TASK = ClassName.get(LIBRARY_PACKAGE, "Task");
     private static final ClassName CLASS_TASK_CALLBACK = CLASS_TASK.nestedClass("Callback");
     private static final ClassName CLASS_TASK_ADVANCEDCALLBACK = CLASS_TASK.nestedClass("AdvancedCallback");
-
     private static final ClassName CLASS_TASKMANAGEROWNER = ClassName.get(LIBRARY_PACKAGE, "TaskManagerOwner");
-
-
-    private static MethodSpec.Builder createOnPreAttachMethod(){
-       return MethodSpec.methodBuilder("getListenerFor")
-                .addParameter(CLASS_TASK, "task")
-               .addParameter(TypeName.BOOLEAN, "isReAttach")
-                .addModifiers(Modifier.PUBLIC)
-                .returns(CLASS_TASK_CALLBACK)
-                .addAnnotation(Override.class);
-    }
-
-
 
     private Filer filer;
 
@@ -62,8 +44,13 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
 
     @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+
+    @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> types = new LinkedHashSet<>();
+        final Set<String> types = new LinkedHashSet<>();
         for (Class<? extends Annotation> annotation : getSupportedAnnotations()) {
             types.add(annotation.getCanonicalName());
         }
@@ -71,108 +58,101 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
 
     private Set<Class<? extends Annotation>> getSupportedAnnotations() {
-        Set<Class<? extends Annotation>> annotations = new LinkedHashSet<>();
-        annotations.add(TaskTarget.class);
+        final Set<Class<? extends Annotation>> annotations = new LinkedHashSet<>();
+        annotations.add(TaskAttach.class);
+        annotations.add(TaskPreExecute.class);
+        annotations.add(TaskPostExecute.class);
+        annotations.add(TaskCancel.class);
+        annotations.add(TaskProgress.class);
         return annotations;
     }
-    private final HashMap<TypeElement, TaskBinding> classMap = new HashMap<>();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        System.out.println("AnnotationsProcessor.process(" + annotations + ")");
+        final HashMap<TypeElement, TaskBindingContainer> classMap = new HashMap<>();
 
-        if(annotations.size() != 1){
-            return false;
+        for(TypeElement annotationType: annotations){
+            processAnnotation(classMap, roundEnv, annotationType);
         }
 
-        //note(null, "AnnotationsProcessor called!");
-
-        // for each javax.lang.model.element.Element annotated with the CustomAnnotation
-        for (Element element : roundEnv.getElementsAnnotatedWith(TaskTarget.class)) {
-
-            final TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
-
-            TaskBinding binding = classMap.get(enclosingElement);
-            System.out.println(enclosingElement);
-            if(binding == null){
-                binding = new TaskBinding();
-                classMap.put(enclosingElement, binding);
-            }
-            binding.add(element);
-
-        }
-
-        for(Map.Entry<TypeElement, TaskBinding> entry: classMap.entrySet()) {
-            System.out.println("Creating java file: " + entry.getKey());
+        for(Map.Entry<TypeElement, TaskBindingContainer> entry: classMap.entrySet()) {
             try {
                 createJavaFile(entry.getKey(), entry.getValue()).writeTo(filer);
-                note(entry.getKey(), "Created java file for %s", entry.getKey());
             } catch (IOException e) {
-                error(entry.getKey(), "Unable to write binding for type %s: %s", entry.getKey(), e.getMessage());
+                error(entry.getKey(), "Unable to write generate java binding file for class %s: %s", entry.getKey(), e.getMessage());
             }
-
         }
-
-
-        return false;
+        return true;
     }
 
-    private JavaFile createJavaFile(TypeElement enclosingElement, TaskBinding binding){
+    private void processAnnotation(HashMap<TypeElement, TaskBindingContainer> classMap, RoundEnvironment roundEnvironment, TypeElement type){
+        for (Element element : roundEnvironment.getElementsAnnotatedWith(type)) {
+            final TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
+            TaskBindingContainer binding = classMap.get(enclosingElement);
+            System.out.println(enclosingElement);
+            if(binding == null){
+                binding = new TaskBindingContainer();
+                classMap.put(enclosingElement, binding);
+            }
+            final Class<? extends Annotation> classType;
+            try {
+                //noinspection unchecked
+                classType = (Class<? extends Annotation>) Class.forName(type.getQualifiedName().toString());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                error(element, "Could not find the Class object for TypeElement %s", type);
+                return;
+            }
+            binding.add(element, classType);
+        }
+    }
 
-        final String packageName = MoreElements.getPackage(enclosingElement).getQualifiedName().toString();
-        final String className = enclosingElement.getQualifiedName().toString().substring(packageName.length() + 1).replace('.', '$');
-        ClassName bindingClassName = ClassName.get(packageName, className + "_TaskBinding");
+    private JavaFile createJavaFile(TypeElement forTypeElement, TaskBindingContainer binding){
 
+        final String packageName = processingEnv.getElementUtils().getPackageOf(forTypeElement).getQualifiedName().toString();
+        final String className = forTypeElement.getQualifiedName().toString().substring(packageName.length() + 1).replace('.', '$');
+        final ClassName bindingClassName = ClassName.get(packageName, className + "_TaskBinding");
 
-        TypeMirror typeMirror = enclosingElement.asType();
-
-
-        MethodSpec constructor = MethodSpec.constructorBuilder()
+        // Create the constructor which takes the target class (the class containing the annotated
+        // methods) as argument.
+        final MethodSpec constructor = MethodSpec.constructorBuilder()
                 .addParameter(TypeVariableName.get("T"), "target", Modifier.FINAL)
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("this.target = target").build();
 
 
+        // create (and implement) the getListenerFor method from the TaskAttachBinding interface
+        final MethodSpec.Builder getListenerForMethod = MethodSpec.methodBuilder("getListenerFor")
+                .addParameter(CLASS_TASK, "task")
+                .addParameter(TypeName.BOOLEAN, "isReAttach")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(CLASS_TASK_CALLBACK)
+                .addAnnotation(Override.class);
 
-        final MethodSpec.Builder onPreAttachMethod = createOnPreAttachMethod();
+        // Create a switch statement to switch between the different tasks
+        getListenerForMethod.beginControlFlow("switch(task.getTag())");
 
+        // Loop through the tasks and create switch cases for them.
+        for(Map.Entry<String, TaskBinding> entry: binding.getTaskBindings().entrySet()){
 
-        onPreAttachMethod.beginControlFlow("switch(task.getTag())");
+            final TaskBinding methods = entry.getValue();
 
-        //void onCanceled(Task<?, ?> task);
-        //void onProgressUpdate(Task<?, ?> task, Object progress);
+            if(methods.getElementForPostExecute() == null){
+                note(forTypeElement, "No @TaskPostExecute annotated method found for task with tag '%s' while other annotated methods for that task have been found!");
+            }
 
+            getListenerForMethod.beginControlFlow("case \"$L\":\n", entry.getKey());
 
-        for(Map.Entry<String, TaskMethods> entry: binding.getTaskMethods().entrySet()){
-
-            onPreAttachMethod.addCode("case \"$L\":", entry.getKey());
-
-            final TaskMethods methods = entry.getValue();
-
-            TypeSpec.Builder callbackImplementation = TypeSpec.anonymousClassBuilder("")
+            // The getListenerFor method requires us to return an implementation of the
+            // Task.Callback class, in this case (even though we might not need it) we use the
+            // Task.AdvancedCallback instead of a simple Task.Callback implementation.
+            final TypeSpec.Builder callbackImplementation = TypeSpec.anonymousClassBuilder("")
                     .addSuperinterface(CLASS_TASK_ADVANCEDCALLBACK);
 
-            MethodSpec.Builder preExecuteMethod = MethodSpec.methodBuilder("onPreExecute")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(CLASS_TASK, "task");
 
-                    if(methods.preExecute != null) {
-                        preExecuteMethod.addStatement("target.$L(task)", methods.preExecute.getSimpleName());
-                    }
-                    callbackImplementation.addMethod(preExecuteMethod.build());
-
-
-            MethodSpec.Builder postExecuteMethod = MethodSpec.methodBuilder("onPostExecute")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(CLASS_TASK, "task");
-
-            if(methods.postExecute != null) {
-                postExecuteMethod.addStatement("target.$L(task)", methods.postExecute.getSimpleName());
-            }
-            callbackImplementation.addMethod(postExecuteMethod.build());
-
+            callbackImplementation.addMethod(createTaskCallbackMethod("onPreExecute", methods.getElementForPreExecute()));
+            callbackImplementation.addMethod(createTaskCallbackMethod("onPostExecute", methods.getElementForPostExecute()));
+            callbackImplementation.addMethod(createTaskCallbackMethod("onCanceled", methods.getElementForCancel()));
 
             MethodSpec.Builder progressUpdateMethod = MethodSpec.methodBuilder("onProgressUpdate")
                     .addAnnotation(Override.class)
@@ -180,102 +160,65 @@ public class AnnotationsProcessor extends AbstractProcessor {
                     .addParameter(CLASS_TASK, "task")
                     .addParameter(TypeName.OBJECT, "object");
 
-            if(methods.progressUpdate != null) {
-                progressUpdateMethod.addStatement("target.$L(task, object)", methods.progressUpdate.getSimpleName());
+            if(methods.getElementForProgress() != null) {
+                progressUpdateMethod.addStatement("target.$L(task, object)", methods.getElementForProgress().getSimpleName());
             }
             callbackImplementation.addMethod(progressUpdateMethod.build());
 
 
-            MethodSpec.Builder canceledMethod = MethodSpec.methodBuilder("onCanceled")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(CLASS_TASK, "task");
-
-            if(methods.cancel != null) {
-                canceledMethod.addStatement("target.$L(task)", methods.cancel.getSimpleName());
+            if(methods.getElementForAttach() != null) {
+                final boolean onlyCallOnReAttach = methods.getElementForAttach().getAnnotation(TaskAttach.class).onlyCallOnReAttach();
+                if(onlyCallOnReAttach){
+                    getListenerForMethod.beginControlFlow("if(isReAttach)");
+                }
+                getListenerForMethod.addStatement("target.$L(task)", methods.getElementForAttach().getSimpleName());
+                if(onlyCallOnReAttach){
+                    getListenerForMethod.endControlFlow();
+                }
             }
-            callbackImplementation.addMethod(canceledMethod.build());
-
-
-
-            if(methods.reattach != null) {
-                onPreAttachMethod.beginControlFlow("if(isReAttach)");
-                onPreAttachMethod.addStatement("target.$L(task)", methods.reattach.getSimpleName());
-            }
-            if(methods.reattach != null && methods.attach != null){
-                onPreAttachMethod.nextControlFlow("else");
-                onPreAttachMethod.addStatement("target.$L(task)", methods.attach.getSimpleName());
-                onPreAttachMethod.endControlFlow();
-            } else if(methods.reattach != null){
-                onPreAttachMethod.endControlFlow();
-            }
-
-
-            onPreAttachMethod.addStatement("return $L", callbackImplementation.build());
-
+            getListenerForMethod.addStatement("return $L", callbackImplementation.build());
+            getListenerForMethod.endControlFlow();
 
         }
 
-        onPreAttachMethod.addCode("default:\n");
-        onPreAttachMethod.addStatement("return null");
-
-        onPreAttachMethod.endControlFlow();
-
-
- /*
-        final TaskTarget annotation = element.getAnnotation(TaskTarget.class);
-
-        final String[] taskIds = annotation.taskIds();
-        final TaskState state = annotation.value();
+        // Add the default switch case
+        getListenerForMethod.addCode("default:\n");
+        getListenerForMethod.addStatement("return null");
+        getListenerForMethod.endControlFlow();
 
 
-        TypeSpec callbackImplementation = TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(CLASS_TASK_CALLBACK)
-                .addMethod(MethodSpec.methodBuilder("onPreExecute")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(CLASS_TASK, "task")
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("onPostExecute")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(CLASS_TASK, "task")
-                        .addStatement("target.$L(task)", element.getSimpleName())
-                        .build())
-                .build();
-
-
-        onPreAttachMethod.beginControlFlow("switch(task.getTag())");
-        for(String tag: taskIds){
-            onPreAttachMethod.addCode("case \"$L\":", tag);
-            onPreAttachMethod.addStatement("return $L", callbackImplementation);
-        }
-        onPreAttachMethod.addCode("default:\n");
-        onPreAttachMethod.addStatement("return null");
-
-        onPreAttachMethod.endControlFlow();
-
-        */
-
-        //onPreAttachMethod.addStatement("return $L", callbackImplementation);
-
-
-        TypeSpec generatedClass = TypeSpec.classBuilder(bindingClassName)
+        // Create an implementation of TaskAttachBinding interface.
+        final TypeSpec generatedClass = TypeSpec.classBuilder(bindingClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(TypeVariableName.get("T"), "target", Modifier.FINAL)
                 .addMethod(constructor)
-                .addTypeVariable(TypeVariableName.get("T", TypeName.get(typeMirror), CLASS_TASKMANAGEROWNER))
+                .addTypeVariable(TypeVariableName.get("T", TypeName.get(forTypeElement.asType()), CLASS_TASKMANAGEROWNER))
                 .addSuperinterface(CLASS_TASKATTACHBINDING)
-                .addMethod(onPreAttachMethod.build())
+                .addMethod(getListenerForMethod.build())
                 .build();
-
-
-
 
         return JavaFile.builder(bindingClassName.packageName(), generatedClass)
-                .addFileComment("Generated code from Android Retainable Tasks. Do not modify!")
+                .addFileComment("Generated code from the Android Retainable Tasks annotations processor. Do not modify!")
                 .build();
     }
+
+    private MethodSpec createTaskCallbackMethod(String methodName, @Nullable Element methodToCall){
+        // Create the implementation of the onPreExecute method.
+        final MethodSpec.Builder onPreExecuteMethod = MethodSpec.methodBuilder(methodName)
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(CLASS_TASK, "task");
+
+        if(methodToCall != null) {
+            onPreExecuteMethod.addStatement("target.$L(task)", methodToCall.getSimpleName());
+        } else {
+            onPreExecuteMethod.addComment("No annotated method found for $L", methodName);
+        }
+        return onPreExecuteMethod.build();
+    }
+
+
+
 
     private void error(Element element, String message, Object... args) {
         printMessage(Diagnostic.Kind.ERROR, element, message, args);

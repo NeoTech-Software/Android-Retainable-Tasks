@@ -350,16 +350,12 @@ public abstract class Task<Progress, Result> {
      * lifecycle methods or one of the callback methods. But throws an exception if called before
      * execution has started.
      * @return The last known progress.
-     * @throws IllegalStateException if called before execution has started.
      */
     public @Nullable Progress getLastKnownProgress(){
         /**
          * It's arguable that an exception should be thrown in this case, because even if the task
          * did start, it might never have published any progress.
          */
-        if(isReady()){
-            throw new IllegalStateException("Progress not available because the task did not start execution.");
-        }
         return lastProgress;
     }
 

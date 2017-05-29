@@ -46,6 +46,10 @@
     <string name="demo_examples_title">Basic examples</string>
     <string name="demo_examples_description">"<![CDATA[This demonstration shows an Activity which extends the <code>TaskActivityCompat</code> class. It demonstrates how <code>Tasks</code> are started using the Activity's <code>TaskManager</code> and how <code>Tasks</code> are retained and attached to the UI after a configuration change.]]>"</string>
 
+    <string name="demo_annotations_title">Annotations example</string>
+    <string name="demo_annotations_description">"<![CDATA[This demonstration shows an Activity which extends <code>TaskActivityCompat</code> and uses Annotations to receive <code>Task</code> lifecycle events like <code>onPostExecute</code>.]]>"</string>
+
+
     <string name="demo_serial_title">Serial execution</string>
     <string name="demo_serial_description">"<![CDATA[By default <code>Tasks</code> are executed using a parallel Executor. This demonstration shows how <code>Tasks</code> can be executed in serial using the <code>TaskManager.execute(Task, Callback, Executor)</code> method.]]>"</string>
 

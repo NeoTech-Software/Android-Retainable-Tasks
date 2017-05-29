@@ -33,7 +33,7 @@ import org.neotech.library.retainabletasks.TaskManagerOwner;
  * @see TaskManager
  * @see TaskManagerLifeCycleProxy
  */
-public class TaskFragmentCompat extends Fragment implements TaskManagerOwner {
+public abstract class TaskFragmentCompat extends Fragment implements TaskManagerOwner {
 
     private final TaskManagerLifeCycleProxy proxy = new TaskManagerLifeCycleProxy(this);
 
@@ -49,6 +49,12 @@ public class TaskFragmentCompat extends Fragment implements TaskManagerOwner {
     public void onStop() {
         proxy.onStop();
         super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        proxy.onDestroy();
     }
 
     @Override

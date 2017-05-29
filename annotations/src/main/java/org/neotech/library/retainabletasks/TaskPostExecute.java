@@ -8,14 +8,11 @@ import java.lang.annotation.Target;
 /**
  * TODO documentation
  *
- * Created by Rolf Smit on 24-May-17.
+ * Created by Rolf Smit on 29-May-17.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
-public @interface TaskTarget {
+public @interface TaskPostExecute {
 
-    State value();
-
-    String[] taskIds();
-
+    String[] value();
 }
