@@ -21,6 +21,8 @@ import android.widget.ViewSwitcher;
 import org.neotech.app.retainabletasksdemo.ExtendedHtml;
 import org.neotech.app.retainabletasksdemo.R;
 import org.neotech.library.retainabletasks.Task;
+import org.neotech.library.retainabletasks.TaskAttach;
+import org.neotech.library.retainabletasks.TaskPostExecute;
 import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ import java.util.List;
 /**
  * Created by Rolf on 16-3-2016.
  */
-public class Main extends TaskActivityCompat implements Task.Callback {
+public final class Main extends TaskActivityCompat {
 
     private ViewSwitcher vSwitcher;
     private ListView list;
@@ -43,7 +45,7 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         list = (ListView) findViewById(android.R.id.list);
 
         if(!getTaskManager().isActive("list-loader")) {
-            getTaskManager().execute(new UselessLoadingTask("list-loader", this), this);
+            getTaskManager().execute(new UselessLoadingTask("list-loader", getApplicationContext()));
         }
     }
 
@@ -69,20 +71,15 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         }
     }
 
-    @Override
-    public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+    // This is quite fancy, we can just omit the Task parameter if we wan't to.
+    @TaskAttach("list-loader")
+    public void onAttach() {
         setListShown(false);
-        return this;
     }
 
-    @Override
-    public void onPreExecute(Task<?, ?> task) {
-
-    }
-
-    @Override
-    public void onPostExecute(Task<?, ?> raw) {
-        UselessLoadingTask task = (UselessLoadingTask) raw;
+    // Even fancier the generated code automatically handles subtypes of Task.
+    @TaskPostExecute("list-loader")
+    public void onPostExecute(UselessLoadingTask task) {
         list.setAdapter(new DemoAdapter(task.getResult()));
         setListShown(true);
     }
@@ -90,7 +87,7 @@ public class Main extends TaskActivityCompat implements Task.Callback {
     /**
      * Task just to demonstrate the principe of starting a task before the UI is ready.
      */
-    private static class UselessLoadingTask extends Task<Void, ArrayList<Demo>> {
+    protected static class UselessLoadingTask extends Task<Void, ArrayList<Demo>> {
 
         private final Context context;
 

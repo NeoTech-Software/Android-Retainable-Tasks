@@ -96,31 +96,30 @@ public abstract class TaskManager {
     /**
      * Start the given task on the default Executor
      * ({@link TaskExecutor#getDefaultExecutor()}). The Task life-cycle events will be delivered to
-     * the given {@link Task.Callback} listener.
+     * the given {@link Task.Callback} listener. If you need annotation support please use
+     * {@link #execute(Task, Executor)} instead which supports annotation based Task life-cycle
+     * callbacks.
      *
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
      * @see TaskExecutor#setDefaultExecutor(Executor)
-     * @deprecated This method has been deprecated, please use {@link #execute(Task)} instead which
-     * supports annotation based Task life-cycle callbacks.
      */
     @MainThread
-    @Deprecated
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback);
 
     /**
      * Start the given task on {@link Executor}
      * ({@link TaskExecutor#setDefaultExecutor(Executor)}). The Task life-cycle events will be
-     * delivered to the given {@link Task.Callback} listener.
+     * delivered to the given {@link Task.Callback} listener. If you need annotation support please
+     * use {@link #execute(Task, Executor)} instead which supports annotation based Task life-cycle
+     * callbacks.
      *
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
      * @param executor The Executor to execute the given Task with.
-     * @deprecated This method has been deprecated, please use {@link #execute(Task, Executor)}
-     * instead which supports annotation based Task life-cycle callbacks.
+     * @deprecated This method has been deprecated,
      */
     @MainThread
-    @Deprecated
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor);
 
     /**

@@ -20,8 +20,7 @@ import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 /**
  * Created by Rolf Smit on 29-May-17.
  */
-
-public class DemoActivityAnnotations extends TaskActivityCompat implements View.OnClickListener, OnAlertDialogClickListener {
+public final class DemoActivityAnnotations extends TaskActivityCompat implements View.OnClickListener, OnAlertDialogClickListener {
 
     private static final String TASK_PROGRESS = "progress-dialog";
     private static final String DIALOG_PROGRESS = "progress-dialog";
@@ -33,7 +32,6 @@ public class DemoActivityAnnotations extends TaskActivityCompat implements View.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo_annotations);
         findViewById(R.id.button_progress_task).setOnClickListener(this);
-
 
         if(savedInstanceState == null) {
             // After starting this activity directly start the task.
@@ -72,7 +70,6 @@ public class DemoActivityAnnotations extends TaskActivityCompat implements View.
             Snackbar.make(findViewById(android.R.id.content), getString(R.string.toast_task_canceled, getString(R.string.task_progress_dialog)), Snackbar.LENGTH_LONG).show();
         }
     }
-
 
     @Override
     public void onDialogFragmentClick(DialogFragment fragment, int which) {

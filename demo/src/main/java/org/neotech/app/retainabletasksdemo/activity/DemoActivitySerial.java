@@ -14,7 +14,7 @@ import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 /**
  * Created by Rolf on 17-3-2016.
  */
-public class DemoActivitySerial extends TaskActivityCompat implements View.OnClickListener, Task.AdvancedCallback {
+public final class DemoActivitySerial extends TaskActivityCompat implements View.OnClickListener, Task.AdvancedCallback {
 
     private static final String TASK_SERIAL_1 = "serial-1";
     private static final String TASK_SERIAL_2 = "serial-2";

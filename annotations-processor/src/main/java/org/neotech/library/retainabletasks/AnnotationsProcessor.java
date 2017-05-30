@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,8 +22,15 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 public final class AnnotationsProcessor extends AbstractProcessor {
@@ -171,7 +179,12 @@ public final class AnnotationsProcessor extends AbstractProcessor {
                 if(onlyCallOnReAttach){
                     getListenerForMethod.beginControlFlow("if(isReAttach)");
                 }
-                getListenerForMethod.addStatement("target.$L(task)", methods.getElementForAttach().getSimpleName());
+                final List<? extends VariableElement> parameters = ((ExecutableElement) methods.getElementForAttach()).getParameters();
+                if(parameters.size() == 0) {
+                    getListenerForMethod.addStatement("target.$L()", methods.getElementForAttach().getSimpleName());
+                } else {
+                    getListenerForMethod.addStatement("target.$L(task)", methods.getElementForAttach().getSimpleName());
+                }
                 if(onlyCallOnReAttach){
                     getListenerForMethod.endControlFlow();
                 }
@@ -185,7 +198,6 @@ public final class AnnotationsProcessor extends AbstractProcessor {
         getListenerForMethod.addCode("default:\n");
         getListenerForMethod.addStatement("return null");
         getListenerForMethod.endControlFlow();
-
 
         // Create an implementation of TaskAttachBinding interface.
         final TypeSpec generatedClass = TypeSpec.classBuilder(bindingClassName)
@@ -210,15 +222,33 @@ public final class AnnotationsProcessor extends AbstractProcessor {
                 .addParameter(CLASS_TASK, "task");
 
         if(methodToCall != null) {
-            onPreExecuteMethod.addStatement("target.$L(task)", methodToCall.getSimpleName());
+            // There is a method known that should be called, check the parameters.
+            final List<? extends VariableElement> parameters = ((ExecutableElement) methodToCall).getParameters();
+            if(parameters.size() == 0){
+                // Zero parameters, just call the method.
+                onPreExecuteMethod.addStatement("target.$L()", methodToCall.getSimpleName());
+            } else if(parameters.size() == 1){
+                // One parameter, check it and call the method.
+                final VariableElement parameter = parameters.get(0);
+                final TypeMirror taskType = processingEnv.getTypeUtils().erasure(processingEnv.getElementUtils().getTypeElement(CLASS_TASK.reflectionName()).asType());
+
+                if(!processingEnv.getTypeUtils().isAssignable(parameter.asType(), taskType)){
+                    // Parameter not an instance of Task
+                    error(parameter, "Type of parameter '%s' is not an instance of '%s'!", parameter.getSimpleName(), taskType);
+                } else {
+                    // Check if the class to cast too is accessible.
+                    final Element requiredElement = processingEnv.getTypeUtils().asElement(parameter.asType());
+                    if (!requiredElement.getModifiers().contains(Modifier.PUBLIC) && !requiredElement.getModifiers().contains(Modifier.PROTECTED)) {
+                        error(parameter, "Type of parameter '%s' is not public or protected accessible! This prevents Android-Retainable-Tasks from casting '%s' to '%s'.\nTo fix this either the type of the parameter or make the class accessible by adding the public or protected modifier!", parameter.getSimpleName(), taskType, parameter.asType().toString());
+                    }
+                    onPreExecuteMethod.addStatement("target.$L(($T) task)", methodToCall.getSimpleName(), parameter.asType());
+                }
+            }
         } else {
             onPreExecuteMethod.addComment("No annotated method found for $L", methodName);
         }
         return onPreExecuteMethod.build();
     }
-
-
-
 
     private void error(Element element, String message, Object... args) {
         printMessage(Diagnostic.Kind.ERROR, element, message, args);

@@ -19,7 +19,7 @@ import org.neotech.app.retainabletasksdemo.TestFragment;
 
 import java.util.HashMap;
 
-public class DemoActivityFragments extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public final class DemoActivityFragments extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String[] FRAGMENT_TAGS = new String[]{"Fragment 1", "Fragment 2", "Fragment 3"};
 

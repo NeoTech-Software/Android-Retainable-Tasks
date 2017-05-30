@@ -16,7 +16,7 @@ import org.neotech.library.retainabletasks.providers.TaskActivity;
 /**
  * Created by Rolf on 4-3-2016.
  */
-public class DemoActivityLegacy extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback {
+public final class DemoActivityLegacy extends TaskActivity implements View.OnClickListener, Task.AdvancedCallback {
 
     private static final String TASK_COUNT_DOWN = "count-down";
     private Button button;
