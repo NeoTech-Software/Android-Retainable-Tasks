@@ -21,6 +21,7 @@ android {
 
 dependencies {
     compile project(':library')
+    compile project(":annotations")
     annotationProcessor project(":annotations-processor")
     //compile 'org.neotech.library:android-retainable-tasks:1.0.0-alpha-1'
 

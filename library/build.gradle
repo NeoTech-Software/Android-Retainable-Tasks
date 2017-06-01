@@ -1,11 +1,13 @@
 apply plugin: 'com.android.library'
 
-ext {
+//ext {
     /**
      * Upload new library version:
      * > gradlew install
      * > gradlew bintrayUpload
      */
+
+/*
 
     bintrayRepo = 'maven'
     bintrayName = 'android-retainable-tasks' //Should match the name of the Bintray online repository
@@ -29,11 +31,12 @@ ext {
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
 }
+*/
 
 //Without this line the Bintray upload will fail as it uses the module directory name as artifactId
-archivesBaseName = artifact
-group = publishedGroupId
-version = libraryVersion
+archivesBaseName = POM_ARTIFACT_ID
+group = GROUP
+version = VERSION_NAME
 
 android {
     compileSdkVersion 25
@@ -42,7 +45,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionName = libraryVersion
+        versionName = VERSION_NAME
     }
     buildTypes {
         release {
@@ -53,17 +56,24 @@ android {
 }
 
 configurations {
-    javadocCompile
+    javadoc
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile project(':annotations')
+
+    // Android Architecture Lifecycle library to support using the TaskManagerLifeCycleProxy in
+    // combination with LifecycleOwner.getLifecycle().addObserver().
     compile 'android.arch.lifecycle:extensions:1.0.0-alpha1'
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
-    testCompile 'junit:junit:4.12'
+
+    // Support library for the support library specific TaskManagerOwners (TaskActivityCompat).
     compile 'com.android.support:appcompat-v7:25.3.1'
-    javadocCompile 'com.android.support:appcompat-v7:25.3.1'
-    compile project(':annotations')
+    javadoc 'com.android.support:appcompat-v7:25.3.1'
+
+    testCompile 'junit:junit:4.12'
 }
 
-apply from: 'publish-library.gradle'
+apply from: rootProject.file('publish-library.gradle')
