@@ -1,37 +1,9 @@
 apply plugin: 'com.android.library'
 
-//ext {
-    /**
-     * Upload new library version:
-     * > gradlew install
-     * > gradlew bintrayUpload
-     */
+// To upload new artifact to maven:
+// > gradlew install
+// > gradlew bintrayUpload
 
-/*
-
-    bintrayRepo = 'maven'
-    bintrayName = 'android-retainable-tasks' //Should match the name of the Bintray online repository
-
-    //Maven metadata
-    publishedGroupId = 'org.neotech.library'
-    libraryName = 'Android-Retainable-Tasks'
-    artifact = 'android-retainable-tasks'
-
-    libraryDescription = 'Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android AsyncTask implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).'
-    libraryVersion = '1.0.0-alpha-1'
-
-    siteUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks'
-    gitUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks.git'
-
-    developerId = 'rolf-smit'
-    developerName = 'Rolf Smit'
-    developerEmail = 'contact@neotechsoftware.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
-}
-*/
 
 //Without this line the Bintray upload will fail as it uses the module directory name as artifactId
 archivesBaseName = POM_ARTIFACT_ID

@@ -34,11 +34,11 @@ public final class ProgressTaskHandler {
     }
 
     @TaskAttach(TASK_PROGRESS)
-    public void onAttach(SimpleTask task){
+    public void onAttach(Task task){
         // Task attaches, make sure to show the progress dialog and update the progress if needed.
         progressDialog = ProgressDialog.showIfNotShowing(demoActivityAnnotations.getSupportFragmentManager(), DIALOG_PROGRESS);
         if(task.getLastKnownProgress() != null) {
-            progressDialog.setProgress(task.getLastKnownProgress());
+            progressDialog.setProgress((Integer) task.getLastKnownProgress());
         }
     }
 

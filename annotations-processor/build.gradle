@@ -5,20 +5,10 @@ apply plugin: 'java'
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
-
-    /**
-     * Upload new library version:
-     * > gradlew install
-     * > gradlew bintrayUpload
-     */
-
-
 //Without this line the Bintray upload will fail as it uses the module directory name as artifactId
 archivesBaseName = POM_ARTIFACT_ID
 group = GROUP
 version = VERSION_NAME
-
-
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
