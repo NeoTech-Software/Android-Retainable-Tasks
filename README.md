@@ -274,10 +274,8 @@ private class VerySimpleTask extends Task<Integer, Integer> {
     }
     
     public List<Integer> getProgressCache(){
-        /**
-         * This method is safe to call on the ui-thread because the
-         * onProgressUpdate method is executed on the same thread.
-         */
+         // This method is safe to call on the ui-thread because the
+         // onProgressUpdate method is executed on the same thread.
         return progressValues;
     }
 }

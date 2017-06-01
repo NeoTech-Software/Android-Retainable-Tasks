@@ -20,10 +20,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="text_open_fragment_activity">Start fragment test activity</string>
-    <string name="text_open_v11_activity">Start non-support library Activity</string>
-
-
     <string name="text_fragment_task_manager_explanation">"This Activity has three Fragments, each Fragment extends the TaskFragment and has its own TaskManager instance.
 
         When you select another Fragment using the left drawer the current fragment will be detached, this means that any Task started using the Fragments TaskManger will only deliver its result when the Fragment is attached to the Activity again.

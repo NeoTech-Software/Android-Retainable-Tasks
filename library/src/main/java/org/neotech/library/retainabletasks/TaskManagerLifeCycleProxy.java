@@ -10,13 +10,13 @@ import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 import org.neotech.library.retainabletasks.internal.TaskAttachBinding;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -24,46 +24,29 @@ import java.util.HashSet;
  */
 public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
 
+    private static final HashMap<Class<?>, Constructor> BINDING_CACHE = new HashMap<>();
     private BaseTaskManager taskManager;
 
+    /**
+     * This {@link TaskManager.TaskAttachListener} is used to find the {@link Task.Callback}
+     * listener for a specific task when it's being re-attached.
+     */
     private final TaskManager.TaskAttachListener attachListener = new TaskManager.TaskAttachListener() {
         @Override
         public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
-            if(generatedCodeTarget != null){
-                Task.Callback callback = generatedCodeTarget.getListenerFor(task, true);
-                if(callback != null){
-                    return callback;
-                }
-                for(TaskAttachBinding binding: additionalBindings){
-                    callback = binding.getListenerFor(task, false);
-                    if(callback != null){
-                        return callback;
-                    }
-                }
-            }
-            //throw new IllegalStateException("Executing task without")
-            return provider.onPreAttach(task);
+            return handleAttach(task, true);
         }
     };
 
-    private final TaskManager.TaskAttachListener firstAttachListener = new TaskManager.TaskAttachListener() {
+    /**
+     * This {@link TaskManager.TaskAttachListener} is set on the TaskManager that this
+     * TaskManagerLifeCycleProxy owns and is used by the TaskManager to find the initial
+     * {@link Task.Callback} listener for a specific task that has just been added for execution.
+     */
+    private final TaskManager.TaskAttachListener initialAttachListener = new TaskManager.TaskAttachListener() {
         @Override
         public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
-            if(generatedCodeTarget != null){
-                Task.Callback callback = generatedCodeTarget.getListenerFor(task, false);
-                if(callback != null){
-                    return callback;
-                }
-                for(TaskAttachBinding binding: additionalBindings){
-                    callback = binding.getListenerFor(task, false);
-                    if(callback != null){
-                        return callback;
-                    }
-                }
-
-            }
-            //throw new IllegalStateException("Executing task without")
-            return provider.onPreAttach(task);
+            return handleAttach(task, false);
         }
     };
 
@@ -77,37 +60,43 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
             throw new IllegalArgumentException("The TaskManagerProvider needs to be an instance of android.app.Activity (including the derived support library activities), android.app.Fragment or android.support.v4.app.Fragment!");
         }
         this.provider = provider;
+        this.generatedCodeTarget = getBindingFor(provider);
+    }
 
-        TaskAttachBinding binding = null;
-        try {
-            Class classType = Class.forName(provider.getClass().getName() + "_TaskBinding");
-            Constructor test = classType.getConstructor(provider.getClass());
-            binding = (TaskAttachBinding) test.newInstance(provider);
-
-            Log.d("Test", "classType: " + classType);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+    private Task.Callback handleAttach(Task<?, ?> task, boolean isReAttach){
+        if(generatedCodeTarget != null){
+            Task.Callback callback = generatedCodeTarget.getListenerFor(task, isReAttach);
+            if(callback != null){
+                return callback;
+            }
         }
-        generatedCodeTarget = binding;
+        for(TaskAttachBinding binding: additionalBindings){
+            Task.Callback callback = binding.getListenerFor(task, isReAttach);
+            if(callback != null){
+                return callback;
+            }
+        }
+        // Fallback to the provider implementation.
+        return provider.onPreAttach(task);
     }
 
-    public void addCustomBinding(TaskAttachBinding binding){
-        additionalBindings.add(binding);
+    public void bindTaskTarget(Object object){
+        final TaskAttachBinding binding = TaskManagerLifeCycleProxy.getBindingFor(object);
+        if(binding != null) {
+            additionalBindings.add(binding);
+        }
     }
 
-    public static TaskAttachBinding loadBindingFor(Object target){
+    private static TaskAttachBinding getBindingFor(Object target){
+        //noinspection TryWithIdenticalCatches (not supported prior to Android API 19)
         try {
-            Class classType = Class.forName(target.getClass().getName() + "_TaskBinding");
-            Constructor test = classType.getConstructor(target.getClass());
-            return (TaskAttachBinding) test.newInstance(target);
+            Constructor bindingClassConstructor = BINDING_CACHE.get(target.getClass());
+            if(bindingClassConstructor == null) {
+                final Class<?> classType = Class.forName(target.getClass().getName() + "_TaskBinding");
+                bindingClassConstructor = classType.getConstructor(target.getClass());
+                BINDING_CACHE.put(target.getClass(), bindingClassConstructor);
+            }
+            return (TaskAttachBinding) bindingClassConstructor.newInstance(target);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -147,7 +136,7 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
     public void onDestroy(){
         // The TaskManager is retained so remove our reference to it, even though the
         // BaseTaskManager already holds this things as "weak" reference.
-        ((BaseTaskManager) getTaskManager()).setDefaultCallbackProvider(null);
+        ((BaseTaskManager) getTaskManager()).setInitialCallbackProvider(null);
     }
 
     @MainThread
@@ -165,12 +154,14 @@ public final class TaskManagerLifeCycleProxy implements LifecycleObserver {
         } else if(provider instanceof android.app.Fragment){
             taskManager = (BaseTaskManager) TaskManager.getFragmentTaskManager((android.app.Fragment) provider);
         }
-        // Else case not needed as everything is checked by the constructor.
+        assert taskManager != null;
+        // else case is not needed as everything is checked by the constructor.
 
-        // Because the TaskManager is retained across configuration changes this call leaks the
-        // TaskAttachListener but the BaseTaskManager implementation keeps a weak reference to the
-        // TaskAttachListener which makes sure it doesn't leak the TaskAttachListener.
-        taskManager.setDefaultCallbackProvider(firstAttachListener);
+        // Because the TaskManager is retained across configuration changes this call could leak the
+        // TaskAttachListener, but because the BaseTaskManager implementation keeps a weak-reference
+        // to the TaskAttachListener it doesn't leak the TaskAttachListener. This however means that
+        // the TaskManagerLifeCycleProxy must keep a strong-reference to the TaskAttachListener.
+        taskManager.setInitialCallbackProvider(initialAttachListener);
         taskManager.setUIReady(uiReady);
         return taskManager;
     }

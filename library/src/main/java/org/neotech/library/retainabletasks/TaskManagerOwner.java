@@ -1,7 +1,6 @@
 package org.neotech.library.retainabletasks;
 
 import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
 
 /**
  * This interface is in general implemented in Fragments or Activities that own a TaskManager and

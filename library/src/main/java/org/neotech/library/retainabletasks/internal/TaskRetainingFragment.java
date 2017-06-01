@@ -39,11 +39,8 @@ public final class TaskRetainingFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        /**
-         * The activity is destroyed, this method WON'T be called when the fragment is being
-         * propagated between activity instances.
-         */
-        //logic.assertFragmentTasksAreDetached();
+        // The activity is destroyed, this method WON'T be called when the fragment is being
+        // propagated between activity instances.
         super.onDestroy();
     }
 

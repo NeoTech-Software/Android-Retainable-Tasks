@@ -1,11 +1,8 @@
 package org.neotech.app.retainabletasksdemo;
 
-import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.design.internal.ParcelableSparseArray;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;

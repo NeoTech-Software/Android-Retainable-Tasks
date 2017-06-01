@@ -3,7 +3,6 @@ package org.neotech.library.retainabletasks.internal;
 import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 import android.util.Pair;
@@ -27,18 +26,34 @@ public final class BaseTaskManager extends TaskManager {
 
     private static final String TAG = "BaseTaskManager";
 
-    protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
+    private final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
     private boolean isUIReady = true;
-    private WeakReference<TaskManager.TaskAttachListener> defaultCallbackProvider;
+    private WeakReference<TaskManager.TaskAttachListener> initialCallbackProvider;
 
-    public void setDefaultCallbackProvider(TaskManager.TaskAttachListener defaultCallbackProvider){
-        this.defaultCallbackProvider = new WeakReference<>(defaultCallbackProvider);
+    /**
+     * Set the initial callback provider ({@link TaskManager.TaskAttachListener}). The
+     * {@link TaskManagerOwner} is responsible for setting the initial callback provider as soon as
+     * it takes ownership of the TaskManager and should preferably set it to null as soon as the
+     * ownership is ended.
+     * @param initialCallbackProvider the initial callback provider that the {@link BaseTaskManager}
+     *                                should use to resolve the initial {@link Task.Callback} for a
+     *                                given {@link Task}.
+     */
+    public void setInitialCallbackProvider(TaskManager.TaskAttachListener initialCallbackProvider){
+        this.initialCallbackProvider = new WeakReference<>(initialCallbackProvider);
     }
 
-    private @NonNull TaskManager.TaskAttachListener getDefaultCallbackProvider() {
-        final TaskManager.TaskAttachListener attachListener = defaultCallbackProvider == null ? null : defaultCallbackProvider.get();
+    /**
+     * Returns the initial callback provider ({@link TaskManager.TaskAttachListener}). The initial
+     * callback provider must be used when no {@link Task.Callback} is provided when
+     * {@link #execute} is called.
+     * @return The initial callback provider or null if the TaskManager is currently not associated
+     * with a {@link TaskManagerOwner}.
+     */
+    private @NonNull TaskManager.TaskAttachListener getInitialCallbackProvider() {
+        final TaskManager.TaskAttachListener attachListener = initialCallbackProvider == null ? null : initialCallbackProvider.get();
         if(attachListener == null){
-            throw new IllegalStateException("Cannot call TaskManager.execute() after the TaskManagerOwner (Activity, Fragment etc.) instance has been destroyed!");
+            throw new IllegalStateException("Cannot call TaskManager.execute() after the TaskManagerOwner (Activity, Fragment etc.) instance does no longer own the TaskManager (has been destroyed).");
         }
         return attachListener;
     }
@@ -141,23 +156,21 @@ public final class BaseTaskManager extends TaskManager {
 
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task){
-        execute(task, getDefaultCallbackProvider().onPreAttach(task), TaskExecutor.getDefaultExecutor());
+        execute(task, getInitialCallbackProvider().onPreAttach(task), TaskExecutor.getDefaultExecutor());
     }
 
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Executor executor){
-        execute(task, getDefaultCallbackProvider().onPreAttach(task), executor);
+        execute(task, getInitialCallbackProvider().onPreAttach(task), executor);
     }
 
     @Override
     @MainThread
-    @Deprecated
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback){
         execute(task, callback, TaskExecutor.getDefaultExecutor());
     }
 
     @Override
-    @Deprecated
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor) {
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();
@@ -219,7 +232,7 @@ public final class BaseTaskManager extends TaskManager {
     }
 
 
-    public void assertMainThread() throws IllegalStateException {
+    private static void assertMainThread() throws IllegalStateException {
         if(Looper.getMainLooper() != Looper.myLooper()){
             throw new IllegalStateException("Method not called on the UI-thread!");
         }
@@ -251,11 +264,9 @@ public final class BaseTaskManager extends TaskManager {
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();
         }
-        /**
-         * The problem described in the attach(TaskManagerProvider) doesn't apply to this method
-         * as all TaskManager methods should be executed on the UI-thread, meaning that no other
-         * method can be called while inside this method.
-         */
+        // The problem described in the attach(TaskManagerProvider) doesn't apply to this method as
+        // all TaskManager methods should be executed on the UI-thread, meaning that no other method
+        // can be called while inside this method.
         for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
             task.getValue().removeCallback();
         }

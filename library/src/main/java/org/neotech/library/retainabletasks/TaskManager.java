@@ -117,7 +117,6 @@ public abstract class TaskManager {
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
      * @param executor The Executor to execute the given Task with.
-     * @deprecated This method has been deprecated,
      */
     @MainThread
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor);
@@ -157,6 +156,7 @@ public abstract class TaskManager {
      * it's result. Calling this method is actually the same as calling {@link #getTask(String)}
      * with a null check.
      * @param tag The tag which identifies the Task to check.
+     * @return true if this TaskManager contains an active task for the given tag, false if not.
      */
     @MainThread
     @CheckResult
@@ -263,11 +263,9 @@ public abstract class TaskManager {
      * @see TaskManager#getActivityTaskManager(Activity)
      */
     public static TaskManager getGlobalTaskManager(){
-        /**
-         * Double checked locking/synchronization.
-         * Without the volatile keyword the first if statement could fail, because the state of the
-         * static field would not necessary be reflected by other threads.
-         */
+        // Double checked locking/synchronization. Without the volatile keyword the first if
+        // statement could fail, because the state of the static field would not necessary be
+        // reflected by other threads.
         if(globalInstance != null){
             return globalInstance;
         }

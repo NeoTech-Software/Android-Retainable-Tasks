@@ -1,13 +1,10 @@
 package org.neotech.library.retainabletasks;
 
-import android.os.Build;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayDeque;
-import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -56,10 +53,10 @@ public class TaskExecutor {
     public static final Executor SERIAL_EXECUTOR = new SerialExecutor();
 
     private static class SerialExecutor implements Executor {
-        private final Queue<Runnable> taskQueue = (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD?new LinkedList<Runnable>():new ArrayDeque<Runnable>());
+        private final Queue<Runnable> taskQueue = new ArrayDeque<>();
         private Runnable activeRunnable;
 
-        public synchronized void execute(final Runnable r) {
+        public synchronized void execute(@NonNull final Runnable r) {
             taskQueue.offer(new Runnable() {
                 public void run() {
                     try {
@@ -121,15 +118,17 @@ public class TaskExecutor {
      * by parallel execution.  If you truly want parallel execution, you can use
      * the {@link Task#executeOnExecutor} version of this method
      * with {@link #THREAD_POOL_EXECUTOR}; however, see commentary there for warnings
-     * on its use.
+     * on its use.</p>
      *
-     * <p>This method must be invoked on the UI thread.
+     * <p>This method must be invoked on the UI thread.</p>
      *
+     * @param task the task to execute on the given {@link Executor}.
+     * @param executor the executor to execute the given {@link Task} on.
+     * @param <Progress> the progress type.
+     * @param <Result> the result type.
      * @return This instance of AsyncTask.
-     *
-     * @throws IllegalStateException If {@link Task#isRunning()} or {@link Task#isFinished()} ()} returns
-     * true.
-     *
+     * @throws IllegalStateException If {@link Task#isRunning()} or {@link Task#isFinished()}
+     * returns true.
      * @see Task#executeOnExecutor(java.util.concurrent.Executor)
      */
     @MainThread

@@ -352,10 +352,6 @@ public abstract class Task<Progress, Result> {
      * @return The last known progress.
      */
     public @Nullable Progress getLastKnownProgress(){
-        /**
-         * It's arguable that an exception should be thrown in this case, because even if the task
-         * did start, it might never have published any progress.
-         */
         return lastProgress;
     }
 

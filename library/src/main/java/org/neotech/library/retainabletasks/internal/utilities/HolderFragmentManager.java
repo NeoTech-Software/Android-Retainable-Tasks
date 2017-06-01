@@ -8,8 +8,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
-import org.neotech.library.retainabletasks.BuildConfig;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +63,8 @@ public final class HolderFragmentManager<F extends Fragment> {
 
     /**
      * This method must be called when an instance of the given retainable fragment is created!
+     *
+     * @param fragment the retainable fragment instance that has just been created.
      */
     public void onHolderFragmentCreated(F fragment) {
         Fragment parentFragment = fragment.getParentFragment();
