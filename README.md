@@ -34,7 +34,7 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         if(task.isCancelled()) {
             // Do something
         } else {
-            // Do soemthing else
+            // Do something else
         }
     }
 }
