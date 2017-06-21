@@ -15,10 +15,10 @@ import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
  * {@link Task.Callback} interface). By default every object
  * that is an instance of {@link TaskManagerOwner} works with annotations out-of-the-box. However
  * if you wan't a custom object to receive task results you should manually bind that object.
- *
+ * <p>
  * Note: only library based classed that implement {@link TaskManagerOwner} are guaranteed to work
  * with annotations out-of-the -box.
- *
+ * <p>
  * Created by Rolf Smit on 29-May-17.
  */
 public final class DemoActivityAnnotations extends TaskActivityCompat implements View.OnClickListener, OnAlertDialogClickListener {
@@ -27,7 +27,7 @@ public final class DemoActivityAnnotations extends TaskActivityCompat implements
 
     private final ProgressTaskHandler progressTaskHandler = new ProgressTaskHandler(this);
 
-    public DemoActivityAnnotations(){
+    public DemoActivityAnnotations() {
         bindTaskTarget(progressTaskHandler);
     }
 
@@ -37,7 +37,7 @@ public final class DemoActivityAnnotations extends TaskActivityCompat implements
         setContentView(R.layout.activity_demo_annotations);
         findViewById(R.id.button_progress_task).setOnClickListener(this);
 
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             // After starting this activity directly start the task.
             progressTaskHandler.execute();
         }

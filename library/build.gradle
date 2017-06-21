@@ -38,8 +38,8 @@ dependencies {
 
     // Android Architecture Lifecycle library to support using the TaskManagerLifeCycleProxy in
     // combination with LifecycleOwner.getLifecycle().addObserver().
-    compile 'android.arch.lifecycle:extensions:1.0.0-alpha1'
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
+    compile 'android.arch.lifecycle:extensions:1.0.0-alpha3'
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha3"
 
     // Support library for the support library specific TaskManagerOwners (TaskActivityCompat).
     compile 'com.android.support:appcompat-v7:25.3.1'
