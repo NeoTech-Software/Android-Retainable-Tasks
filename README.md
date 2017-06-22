@@ -17,7 +17,7 @@ Simple, no need to retain stuff yourself, just implement the methods/annotations
 all set.
 
 ```java
-public class Main extends TaskActivityCompat implements Task.Callback {
+public class Main extends TaskActivityCompat {
     
     @Override
     public void onClick(View view){
@@ -26,11 +26,12 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         }
     }
     
-    // Now this is cool, we can have a single method handle both
-    // the normal onPostExecute and the onCancelled call.
+    // Now this is cool, we can have a single method handle both calls,
+    // also note how this method will still be called in the new
+    // Activity instance after after rotation.
     @TaskPostExecute("task-id")
     @TaskCancel("task-id")
-    public void onFinish(SimpleTask task){
+    public void onFinish(ExampleTask task){
         if(task.isCancelled()) {
             // Do something
         } else {
