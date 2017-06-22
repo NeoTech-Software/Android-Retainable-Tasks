@@ -1,37 +1,51 @@
 # Android-Retainable-Tasks Documentation
+When you are new to this library the advice is to read at least chapter *"1. Basic usage"*. Besides this documentation make sure to try out the sample app and check the source code. If something is not clear to you please don't keep it for yourself but create and issue instead.
 
-**Index**
+## Index
 
 1. [Basic usage](#1-basic-usage)
+    1. [Creating the task](#1-1-creating-the-task)
+    2. [Extending from the TaskActivityCompat class](#1-2-extending-from-the-taskactivitycompat-class)
+    3. [Callback](#1-3-callback)
+    4. [Executing the task](#1-4-executing-the-task)
 2. [How it works](#2-how-it-works)
 3. [Tips and tricks](#3-tips-and-tricks)
+    1. [Getting the task result](#1-getting-the-task-result)
+    2. [Getting the task state](#2-getting-the-task-state)
+    3. [Getting the task last progress update](#3-getting-the-task-last-progress-update)
+    4. [AdvancedCallback](#4-advancedcallback)
+    5. [Annotations outside Activities or Fragments](#5-annotations-outside-activities-or-fragments)
+    6. [TaskExecutor & Executor](#6-taskexecutor-executor)
+    7. [Using the TaskManagerLifeCycleProxy to mimic the TaskActivityCompat](#7-using-the-taskmanagerlifecycleproxy-to-mimic-the-taskactivitycompat)
 4. [FAQ](#4-faq)
 
 
 ## 1. Basic usage
 To execute a task (which is bound to the user-interface and is automatically retained across configuration changes) you need to do follow these 4 simple steps:
 
+
+1. Create an implementation of the `Task` class;
+2. Make your Activity extend the `TaskActivityCompat` class (or for Fragments the `TaskFragmentCompat` class);
+
 **Annotation based**
 
-1. Create an implementation of the `Task` class;
-2. Make your Activity extend the `TaskActivityCompat` class (or for Fragments the `TaskFragmentCompat` class);
-3. Create one or more annotated methods with the following annotations: `@TaskPreExecute`, `@TaskPostExecute`, `@TaskCancel`, `@TaskProgress` and `@TaskAttach`;  
-4. Execute the task using the `TaskManager`;
-    
+<ol start="3">
+  <li>Create one or more annotated methods with the following annotations: <code>@TaskPreExecute</code>, <code>@TaskPostExecute</code>, <code>@TaskCancel</code>, <code>@TaskProgress</code> and <code>@TaskAttach</code>;</li>
+  <li>Execute the task using the <code>TaskManager</code>;</li>
+</ol>
+
+
 **Listener based**
 
-1. Create an implementation of the `Task` class;
-2. Make your Activity extend the `TaskActivityCompat` class (or for Fragments the `TaskFragmentCompat` class);
-3. Implement the `Callback` interface somewhere and provide a new callback when the Activity is restarted using `TaskActivityCompat.onPreAttach()`;  
-4. Execute the task using the `TaskManager` and point it to your `Callback` implementation;
-
-> Step 1 and 2 are the same in both styles: annotation and listener based.
+<ol start="3">
+  <li>Implement the <code>Callback</code> interface somewhere and provide a new callback when the Activity is restarted using <code>TaskActivityCompat.onPreAttach()</code>;</li>
+  <li>Execute the task using the <code>TaskManager</code> and point it to your <code>Callback</code> implementation;</li>
+</ol>
 
 
 ### 1.1 Creating the task
 
-You will need to extend the `Task` class to create a custom task. The `Task` class is heavily based on the default Android `AsyncTask` class and you will need to override at least the `doInBackground` method and provide an appropriate constructor. 
-
+You will need to extend the `Task` class to create a custom task. The `Task` class is heavily based on the default Android </code>
 ```java
 private class ExampleTask extends Task<Integer, String> {
     
@@ -78,8 +92,12 @@ public class Main extends TaskActivityCompat implements Task.Callback {
     
     @Override
     public Task.Callback onPreAttach(Task<?, ?> task) {
-        //Restore the user-interface based on the tasks state
-        return this; //This Activity implements Task.Callback
+        if("activity-unique-tag".equals(task.getTag())) {
+            //Restore the user-interface based on the tasks state
+            return this; //This Activity implements Task.Callback for the given task
+        }
+         // Other (unknown) tasks, code won't reach this if you execute just one task
+        return null;
     }
     
     @Override
@@ -94,20 +112,17 @@ public class Main extends TaskActivityCompat implements Task.Callback {
 }
 ```
 
-**Annotation based**
+**Annotation based**  
 
 ```java
 public class Main extends TaskActivityCompat {
     
-    // Now this is cool, we can have a single method handle both calls,
-    // also note how this method will still be called in the new
-    // Activity instance after after rotation.
-    @TaskPostExecute("task-id")
-    public void onFinish(ExampleTask task){
-    
+    @TaskPreExecute("activity-unique-tag")
+    public void onStart(ExampleTask task){
+        // Task started
     }
     
-    @TaskCancel("task-id")
+    @TaskPostExecute("activity-unique-tag")
     public void onFinish(ExampleTask task){
         // Task finished
     }
@@ -117,7 +132,7 @@ public class Main extends TaskActivityCompat {
 > **In-depth:**
 > The `TaskManger` (or actually a internal class) will detect when the Activity stops (`onStop()`). and will automatically remove all `Callback` listeners when this happens. Removing the listeners is needed to avoid memory leaks, as listeners could reference to Activities or Fragments which are about to be destroyed by the Android system. Removing the listeners in `onStop()` also avoids having tasks report their result while the Activity is in the background. As soon as `onStart()` is called the `TaskManager` takes care of setting new listeners on all the tasks. You will need to provide these new listeners when the `onPreAttach()` method is called. If annotations are used this process is a bit more automated and you won't need to override `onPreAttach()`.
 
-### 1.4 Executing the Task
+### 1.4 Executing the task
 Executing a `Task` is extremely easy, just obtain an instance of the `TaskManager` and call one of the `execute()` methods. When working with `Callback` listeners instead of annotations you will need to provide the initial `Callback` listener when executing a `Task`, when working with annotations this is done automatically. Preferably your activity implements the `Callback` interface when working without annotations, but this isn't necessarily needed.
 
 **Listener based**
@@ -186,10 +201,10 @@ The `Task` and `Callback` class have these methods in common, except for the `do
 ---
 Besides the basics there are some more advanced API's you will probably need.
 
-####**Getting task results**
+####**1. Getting the task result**
 Unlike the default Android `AsyncTask` implementation you don't get `Task` results as a parameter, instead you will need to call the `Task.getResult()` method, which returns the tasks result.
 
-####**Getting the tasks current state**
+####**2. Getting the task state**
 The Android `AsyncTask` API provides the `AsyncTask.getStatus()` method which returns an enum value which can be used to determinate the tasks current state. Instead of using that method combined with an enum you can use on of the following methods:
 
 * `isFinished()`
@@ -198,13 +213,16 @@ The Android `AsyncTask` API provides the `AsyncTask.getStatus()` method which re
 * `isResultDelivered()`
 * `isCanceled()`
 
-####**Getting the tasks last progress update**
+####**3. Getting the task last progress update**
 To get the tasks most recent progress update use the `getLastKnownProgress()` method, this method returns null when no last know progress is available.
 
-####**AdvancedCallback**
+####**4. AdvancedCallback**
 If you need the `onProgressUpdated` and `onCanceled` callback methods you can implement the `AdvancedCallback` interface, which is an extension of the `Callback` interface.
 
-####**TaskExecutor & Executor**
+####**5. Annotations outside Activities or Fragments**
+By default annotated methods are only resolved if they are added to a `TaskActivityCompat` or `TaskFragmentCompat`, but you can register custom classes using the `TaskActivityCompat.bindTaskTarget()` method you must call this method as soon as possible, for example in the constructor of the Activity to prevent missing callbacks. You obviously need to re-register the object when a configuration change occurs like rotation.
+
+####**6. TaskExecutor & Executor**
 You can also execute tasks without using a `TaskManager` this means that you are responsible for removing and setting the `Callback` listener. Executing tasks without using the `TaskManager` is handy when you don't necessarily need to get any feedback to the user-interface.
 
 ```java
@@ -224,7 +242,7 @@ You can also use a custom java `Executor` to execute tasks with:
 TaskExecutor.executeOnExecutor(new ExampleTask(), yourExecutor);
 ```
 
-####**Using the TaskManagerLifeCycleProxy to mimic the TaskActivityCompat**
+####**7. Using the TaskManagerLifeCycleProxy to mimic the TaskActivityCompat**
 If you already use some custom Activity or Fragment implementation you might not be able to use the `TaskActivityCompat` or `TaskFragmentCompat` class. To overcome this problem you can implement the behaviour of the `TaskActivityCompat` yourself using the `TaskManagerLifeCycleProxy` class.
 
 Create a new `TaskManagerLifeCycleProxy` instance and let your Activity (or Fragment) implement the `TaskManagerOwner` interface. Override the`onStart()` and `onStop()` methods and proxy those together with the `getTaskManager()` method  to the `TaskManagerLifeCycleProxy` instance.

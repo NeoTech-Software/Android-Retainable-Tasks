@@ -62,6 +62,10 @@ public abstract class TaskFragmentCompat extends Fragment implements TaskManager
        return proxy.getTaskManager();
     }
 
+    public final void bindTaskTarget(Object object){
+        proxy.bindTaskTarget(object);
+    }
+
     @Override
     public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
         return null;

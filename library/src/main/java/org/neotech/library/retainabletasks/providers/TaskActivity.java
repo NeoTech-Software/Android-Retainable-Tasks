@@ -65,6 +65,10 @@ public abstract class TaskActivity extends Activity implements TaskManagerOwner 
         return proxy.getTaskManager();
     }
 
+    public final void bindTaskTarget(Object object){
+        proxy.bindTaskTarget(object);
+    }
+
     @Override
     public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
         return null;
