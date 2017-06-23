@@ -23,7 +23,7 @@ dependencies {
     compile project(':library')
     compile project(":annotations")
     annotationProcessor project(":annotations-processor")
-    //compile 'org.neotech.library:android-retainable-tasks:1.0.0-alpha-1'
+    //compile 'org.neotech.library:android-retainable-tasks:1.0.0-rc-1'
 
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'

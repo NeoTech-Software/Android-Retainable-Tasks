@@ -24,7 +24,7 @@ public class Main extends TaskActivityCompat {
     @Override
     public void onClick(View view){
         if (!getTaskManager().isActive("task-id")) {
-            getTaskManager().execute(new ExampleTask("task-id"), this);
+            getTaskManager().execute(new ExampleTask("task-id"));
         }
     }
     
@@ -53,10 +53,10 @@ Android-Retainable-Tasks is available on jcenter just like many other Android/Ja
 ```groovy
 dependencies {
     // The library dependency
-    compile 'org.neotech.library:android-retainable-tasks:1.0.0-alpha-1'
+    compile 'org.neotech.library:android-retainable-tasks:1.0.0-rc-1'
     
     // Needed if you want to use annotations
-    annotationProcessor 'org.neotech.library:android-retainable-tasks-compiler:1.0.0-alpha-1'
+    annotationProcessor 'org.neotech.library:android-retainable-tasks-compiler:1.0.0-rc-1'
 }
 ```
 
