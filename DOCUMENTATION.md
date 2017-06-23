@@ -1,5 +1,5 @@
 # Android-Retainable-Tasks Documentation
-When you are new to this library the advice is to read at least chapter *"1. Basic usage"*. Besides this documentation make sure to try out the sample app and check the source code. If something is not clear to you please don't keep it for yourself but create and issue instead.
+When you are new to this library the advice is to read at least chapter *"1. Basic usage"*. Besides this documentation make sure to try out the sample app and check the source code. If something is not clear to you or if something is wrong within the documentation please don't keep it for yourself but instead create and issue or even a pull-request, thanks.
 
 ## Index
 
@@ -8,8 +8,7 @@ When you are new to this library the advice is to read at least chapter *"1. Bas
     2. [Extending from the TaskActivityCompat class](#1-2-extending-from-the-taskactivitycompat-class)
     3. [Callback](#1-3-callback)
     4. [Executing the task](#1-4-executing-the-task)
-2. [How it works](#2-how-it-works)
-3. [Tips and tricks](#3-tips-and-tricks)
+2. [Tips and tricks](#2-tips-and-tricks)
     1. [Getting the task result](#1-getting-the-task-result)
     2. [Getting the task state](#2-getting-the-task-state)
     3. [Getting the task last progress update](#3-getting-the-task-last-progress-update)
@@ -17,6 +16,7 @@ When you are new to this library the advice is to read at least chapter *"1. Bas
     5. [Annotations outside Activities or Fragments](#5-annotations-outside-activities-or-fragments)
     6. [TaskExecutor & Executor](#6-taskexecutor-executor)
     7. [Using the TaskManagerLifeCycleProxy to mimic the TaskActivityCompat](#7-using-the-taskmanagerlifecycleproxy-to-mimic-the-taskactivitycompat)
+3. [How it works](#3-how-it-works)
 4. [FAQ](#4-faq)
 
 
@@ -165,39 +165,8 @@ public class Main extends TaskActivityCompat implements Task.Callback {
 >**Tip:**
 >You can also make your Fragment extend the `TaskFragmentCompat` class and use a Fragment to execute and retain your task in. It works exactly the same, but keep in mind that the `Callback` listeners are removed as soon as the Fragments stops (`onStop()`). 
 
-## 2. How it works
----
-####**How are tasks retained?**
-Tasks are retained across configuration changes using a similar method as `ViewModels` are being retained in the [Android Architecture Lifecycle](https://developer.android.com/reference/android/arch/lifecycle/Lifecycle.html) library. In short `Task` objects are stored in `TaskManagers` which are stored in so called *"no-ui-fragments"* (Fragments which have called `setRetainInstanceState(true)`). The creation of these no-ui-fragments happens as soon as the first call to one of these methods is made:
 
- - `getTaskManager()` in the following classes:
-     - `TaskActivity` & `TaskActivityCompat`
-     - `TaskFragment` & `TaskFragmentCompat`
- - `TaskManagerLifeCycleProxy.getTaskManager()`
- - `TaskManager.getActivityTaskManager()` <sub>(super-advanced usage)</sub>
- - `TaskManager.getFragmentTaskManager()` <sub>(super-advanced usage)</sub>
-
-Essentially any time you request a `TaskManager`. You should however note that the library itself also internally calls these methods.
-
-The `onStart()` and `onStop()` methods are forwarded from `Activities` and `Fragments` to the different `TaskManagers` that are retained using the no-ui-fragments. The `TaskManagers` then take care of removing and setting all `Callback` listeners from the different `Tasks`.
-
-####**What happens when a Task without callback finishes?**
-When a Task currently does not have a `Callback` listener to deliver it's results to it will wait with the delivery and deliver the results as soon as a new listener is attached. This happens for example right after the `onPreAttachTask(Task)` method returns, the newly provided `Callback` listener will then be attached to the `Task` and the `Task` immediately fires the listener. This all happens during the Activity or Fragment `onStart()` method and you need to be sure that at this point the user-interface is ready. If you manually call one of the `TaskManager.attach()` methods a `Task` might also immediately fire the new listener.
-
-**Important:** Only the `onPostExecute()` and `onCanceled()` methods will wait for delivery, other method's like `onProgressUpdate` won't wait for delivery and will be skipped if no `Callback` listener is attached to the `Task`. You can restore a tasks progress using the `Task.getLastKnownProgress()` method.
-
-####**What does the Task and Callback life-cycle look like?**
-A `Task` basically has four life-cycle methods *(its heavily based on Android's AsyncTask)*:
-
-* `onPreExecute()` *[ui-thread]*
-* `doInBackground()` *[executor-thread]*
-* `onProgressUpdate()` *[ui-thread]*
-* `onPostExecute()` or `onCanceled()` *[ui-thread]*
-
-The `Task` and `Callback` class have these methods in common, except for the `doInBackground()` method. When a `Callback` listener is attached to a `Task`, both the `Callback` and the `Task` methods will be called. But when the listener is detached from the `Task` only the tasks methods will be called. However as stated before the `Task` will wait with calling the `onPostExecute()` and `onCanceled()` if the `Task` currently does not have a callback until a new `Callback` is attached to the `Task`.
-
-
-## 3. Tips and tricks
+## 2. Tips and tricks
 ---
 Besides the basics there are some more advanced API's you will probably need.
 
@@ -276,32 +245,72 @@ public class MyBaseActivity extends SomeActivity implements TaskManagerOwner {
 }
 ```
 
+
+## 3. How it works
+How this library works is not extremely complicated it can however be quite difficult to understand correctly if you have limited knowledge about the Android Activity and Fragment life-cycle and how Android manages these objects.
+
+####**How are task objects retained?**
+The first thing to understand is how `Task` objects are kept alive when the Activity is destroyed by the system when a configuration change occurs (like rotation). Often used solutions include using static variables, the `Application` class or the `Activity.onRetainNonConfigurationInstance()` method  to store objects in. These methods are however non optimal and Google suggests using the Fragment API in combination with `Fragment.setRetainInstanceState(true)` instead. Using the Fragment API avoids keeping objects alive after the Activity or Fragment is destroyed for good which can happen when the `Application` class or static variables are used. Google demonstrates the practise of using the Fragment API in combination with `setRetainInstanceState(true)` in the excellent [Android Architecture Lifecycle](https://developer.android.com/reference/android/arch/lifecycle/Lifecycle.html) library.
+
+This library leverages the same principle and uses so called *"no-ui-fragments"* which are retained using `setRetainInstanceState(true)` to store objects in. The objects stored in these Fragments are `TaskManager` objects which in their turn store `Task` objects. The creation of these no-ui-fragments happens as soon as the first call to one of these methods is made:
+
+ - `getTaskManager()` in the following classes:
+     - `TaskActivity` & `TaskActivityCompat`
+     - `TaskFragment` & `TaskFragmentCompat`
+ - `TaskManagerLifeCycleProxy.getTaskManager()`
+ - `TaskManager.getActivityTaskManager()` <sub>(super-advanced usage)</sub>
+ - `TaskManager.getFragmentTaskManager()` <sub>(super-advanced usage)</sub>
+
+Essentially any time you request a `TaskManager`. You should however note that the library itself also internally calls these methods.
+
+####**What about the Callback listeners?**
+Each `Task` has a listener attached to it (`Callback` interface), these listeners must not leak between Activity instances, especially since a listener might hold a reference to an Activity causing it to leak the Activity object. Therefor the `TaskManager` makes sure listeners must be removed from a task as soon as the Activity is being destroyed. A new listener is attached to the `Task` when the new Activity is created, so that the `Task` can still report it's result. To prevent Tasks from reporting their results before the Activity is started the `Callback` listeners are removed in `onStop()` and attached in `onStart()`.
+
+The new listeners that need to be attached to a `Task` are acquired during `onStart()` the Activity (or Fragment) TaskManager will call the `onPreAttach(Task)` method which then should return the new listeners for that specific `Task`. When annotations are used `Callback` listeners are automatically generated at compile time and automatically attached to `Tasks` so there is no need to override `onPreAttach(Task)`.
+
+####**What happens when a Task without Callback finishes?**
+When a `Task` does not have a `Callback` listener attached to it (after `onStop()` and before `onStart()` is called) it will skip/wait with the delivery and deliver the results as soon as a new listener is attached. This happens right after the `onPreAttach(Task)` method returns, as the `TaskManager` will immediately attach the newly provided `Callback` listener to the `Task` and the `Task` can immediately fire the listener if it was waiting for it. Because this all happens during the Activity or Fragment `onStart()` you need to be sure that at this point the user-interface is ready. If you manually call one of the `TaskManager.attach()` methods a `Task` might also immediately fire the new listener.
+
+**Important:** Only the `onPostExecute()` and `onCanceled()` methods will wait for delivery, other method's like `onProgressUpdate` won't wait for delivery and will be skipped if no `Callback` listener is attached to the `Task`. You can restore a tasks progress using the `Task.getLastKnownProgress()` method.
+
+####**How does the Task and Callback life-cycle work?**
+A `Task` basically has four life-cycle methods *(its heavily based on Android's AsyncTask)*:
+
+* `onPreExecute()` *[ui-thread]*
+* `doInBackground()` *[executor-thread]*
+* `onProgressUpdate()` *[ui-thread]*
+* `onPostExecute()` or `onCanceled()` *[ui-thread]*
+
+The `Task` and `Callback` class have these methods in common, except for the `doInBackground()` method. When a `Callback` listener is attached to a `Task`, both the `Callback` and the `Task` methods will be called. But when the listener is detached from the `Task` only the tasks methods will be called. However as stated before the `Task` will wait with calling the `onPostExecute()` and `onCanceled()` methods if the `Task` currently does not have a listener attached to it.
+
+
 ## 4. FAQ
 
-####**Why does the Task class still have the onPostExecute and onPreExecute etc. methods?**
+####**Why does the Task class have the same methods that are already available in the Callback interface?**
 
-Although the `Callback` interface provides these methods sometimes you don't need any callback to the Activity's user-interface, at that moment the Task methods come in handy. It also gives a `Task` the change to modify it's state or store it's progress values, for example:
+Although the `Callback` interface provides these methods sometimes you don't need any callback to the Activity's user-interface, in these scenarios the `Task` methods come in handy. It also gives a `Task` the change to modify it's state or store it's progress values, for example:
+
 ```java
 private class VerySimpleTask extends Task<Integer, Integer> {
 
     private final ArrayList<Integer> progressValues = new ArrayList<>();
     
     public ExampleTask(String tag){
-		super(tag);
-	}
+        super(tag);
+    }
 	
-	@Override
-	protected Boolean doInBackground() {
-		for(int i = 0; i < 10; i++){
-		    publishProgress(i);
+    @Override
+    protected Boolean doInBackground() {
+	    for(int i = 0; i < 10; i++){
+            publishProgress(i);
             SystemClock.sleep(500);
         }
-		return 10;
-	}
+        return 10;
+    }
 	
-	@Override
-	protected void onProgressUpdate(Integer value) {
-	    progressValues.add(value);
+    @Override
+    protected void onProgressUpdate(Integer value) {
+        progressValues.add(value);
     }
     
     public List<Integer> getProgressCache(){
