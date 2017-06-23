@@ -2,7 +2,9 @@
 [ ![Download](https://api.bintray.com/packages/rolf-smit/maven/android-retainable-tasks/images/download.svg) ](https://bintray.com/rolf-smit/maven/android-retainable-tasks/_latestVersion)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android%20Retainable%20Tasks-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/3236)
 
-**Android-Retainable-Tasks is an easy to use mini-library that makes it really easy to retain background tasks.** Executing something in the background while maintaining the UI can be quite challenging, especially when Android recreates your Activity on rotation. This library tries to solve this problem by making sure your background task is attached to the (new) UI when needed. The implementation of this library is based on the `AsyncTask` source from Android O and uses the same patterns (and has support for) as used in the new [Android Architecture Lifecycle](https://developer.android.com/reference/android/arch/lifecycle/Lifecycle.html) library to retain tasks. 
+**Android-Retainable-Tasks is an easy to use mini-library that makes it really easy to retain background tasks.** Executing something in the background while maintaining the UI can be quite challenging, especially when Android recreates your Activity on rotation. This library tries to solve this problem by making sure your background task is attached to the (new) UI when needed. The implementation of this library is based on the `AsyncTask` source from Android O and uses the same patterns as used in the new [Android Architecture Lifecycle](https://developer.android.com/reference/android/arch/lifecycle/Lifecycle.html) library to retain tasks. 
+
+![Android Retainable Tasks](resources/function-illustration.png)
 
 *Key features:*
 
