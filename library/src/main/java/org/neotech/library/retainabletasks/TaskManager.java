@@ -78,6 +78,8 @@ public abstract class TaskManager {
      * {@link TaskManager}.
      *
      * @param task The Task to execute.
+     * @param <Progress> the type of optional progress values that the Task can emit.
+     * @param <Result> the type of the result that the Task will return.
      * @see TaskExecutor#setDefaultExecutor(Executor)
      */
     @MainThread
@@ -88,6 +90,8 @@ public abstract class TaskManager {
      * delivered to the class owning ({@link TaskManagerOwner}) this {@link TaskManager}.
      *
      * @param task The Task to execute.
+     * @param <Progress> the type of optional progress values that the Task can emit.
+     * @param <Result> the type of the result that the Task will return.
      * @param executor The Executor to execute the given Task with.
      */
     @MainThread
@@ -102,6 +106,8 @@ public abstract class TaskManager {
      *
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
+     * @param <Progress> the type of optional progress values that the Task can emit.
+     * @param <Result> the type of the result that the Task will return.
      * @see TaskExecutor#setDefaultExecutor(Executor)
      */
     @MainThread
@@ -117,6 +123,8 @@ public abstract class TaskManager {
      * @param task The Task to execute.
      * @param callback The Callback listener to deliver the Task events to.
      * @param executor The Executor to execute the given Task with.
+     * @param <Progress> the type of optional progress values that the Task can emit.
+     * @param <Result> the type of the result that the Task will return.
      */
     @MainThread
     public abstract <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback, @NonNull Executor executor);
