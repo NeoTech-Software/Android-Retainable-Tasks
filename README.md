@@ -87,7 +87,7 @@ Pull-requests are always welcome, if you are not sure about adding or modifying 
 
 To-do list:
 
- - Add support for RXJava observables, so that this library can optionally be used to retain those observables.
- - Finish documentation;
- - Get a fancy logo;
- - Write some real tests for the library besides having only a demo app;
+ - [ ] Add support for RXJava observables, so that this library can optionally be used to retain those observables.
+ - [ ] Finish documentation;
+ - [ ] Get a fancy logo;
+ - [ ] Write some real tests for the library besides having only a demo app;
