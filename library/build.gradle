@@ -1,49 +1,23 @@
 apply plugin: 'com.android.library'
 
-ext {
-    /**
-     * Upload new library version:
-     * > gradlew install
-     * > gradlew bintrayUpload
-     */
+// To upload new artifact to maven:
+// > gradlew install
+// > gradlew bintrayUpload
 
-    bintrayRepo = 'maven'
-    bintrayName = 'android-retainable-tasks' //Should match the name of the Bintray online repository
-
-    //Maven metadata
-    publishedGroupId = 'org.neotech.library'
-    libraryName = 'Android-Retainable-Tasks'
-    artifact = 'android-retainable-tasks'
-
-    libraryDescription = 'Android-Retainable-Tasks is an easy to use mini-library for easy asynchronous background tasking with callback support to the UI. This library is based on the Android AsyncTask implementation but with support for retaining tasks and therefore surviving configuration changes (orientation).'
-    libraryVersion = '0.2.5'
-
-    siteUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks'
-    gitUrl = 'https://github.com/NeoTech-Software/Android-Retainable-Tasks.git'
-
-    developerId = 'rolf-smit'
-    developerName = 'Rolf Smit'
-    developerEmail = 'contact@neotechsoftware.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
-}
 
 //Without this line the Bintray upload will fail as it uses the module directory name as artifactId
-archivesBaseName = artifact
-group = publishedGroupId
-version = libraryVersion
+archivesBaseName = POM_ARTIFACT_ID
+group = GROUP
+version = VERSION_NAME
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.3'
 
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 24
-        versionCode 1
-        versionName = libraryVersion
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionName = VERSION_NAME
     }
     buildTypes {
         release {
@@ -54,14 +28,24 @@ android {
 }
 
 configurations {
-    javadocCompile
+    javadoc
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile project(':annotations')
+
+    // Android Architecture Lifecycle library to support using the TaskManagerLifeCycleProxy in
+    // combination with LifecycleOwner.getLifecycle().addObserver().
+    compile 'android.arch.lifecycle:extensions:1.0.0-alpha3'
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha3"
+
+    // Support library for the support library specific TaskManagerOwners (TaskActivityCompat).
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    javadoc 'com.android.support:appcompat-v7:25.3.1'
+
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    javadocCompile 'com.android.support:appcompat-v7:24.2.1'
 }
 
-apply from: 'publish-library.gradle'
+apply from: rootProject.file('publish-library.gradle')

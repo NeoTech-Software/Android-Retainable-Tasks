@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskManager;
 import org.neotech.library.retainabletasks.TaskManagerLifeCycleProxy;
-import org.neotech.library.retainabletasks.TaskManagerProvider;
+import org.neotech.library.retainabletasks.TaskManagerOwner;
 
 /**
  * <p>
@@ -38,7 +38,7 @@ import org.neotech.library.retainabletasks.TaskManagerProvider;
  * @see TaskManagerLifeCycleProxy
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class TaskActivity extends Activity implements TaskManagerProvider {
+public abstract class TaskActivity extends Activity implements TaskManagerOwner {
 
     private final TaskManagerLifeCycleProxy proxy = new TaskManagerLifeCycleProxy(this);
 
@@ -55,8 +55,18 @@ public class TaskActivity extends Activity implements TaskManagerProvider {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        proxy.onDestroy();
+    }
+
+    @Override
     public final TaskManager getTaskManager() {
         return proxy.getTaskManager();
+    }
+
+    public final void bindTaskTarget(Object object){
+        proxy.bindTaskTarget(object);
     }
 
     @Override

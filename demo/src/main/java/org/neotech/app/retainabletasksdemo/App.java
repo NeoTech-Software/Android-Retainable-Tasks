@@ -9,11 +9,16 @@ import org.neotech.library.retainabletasks.TaskManager;
 /**
  * Created by Rolf on 29-2-2016.
  */
-public class App extends Application {
+public final class App extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
         LeakCanary.install(this);
         TaskManager.setStrictDebugMode(true);
     }

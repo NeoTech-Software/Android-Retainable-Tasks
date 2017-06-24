@@ -1,82 +1,54 @@
 package org.neotech.library.retainabletasks.internal;
 
-import android.annotation.TargetApi;
-import android.os.Build;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentManager;
+import android.os.Bundle;
+import android.support.annotation.RestrictTo;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 
-import org.neotech.library.retainabletasks.TaskManager;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.neotech.library.retainabletasks.internal.utilities.HolderFragmentManager;
 
 /**
- * Created by Rolf on 4-3-2016.
+ * Created by Rolf on 29-2-2016.
  */
-public final class TaskRetainingFragment {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public final class TaskRetainingFragment extends Fragment {
 
     public static final String FRAGMENT_TAG = "org.neotech.library.retainabletasks.TaskRetainingFragment";
 
-    private final HashMap<String, TaskManager> fragmentTaskManagers = new HashMap<>();
+    private static final HolderFragmentManager<TaskRetainingFragment> sHolderFragmentManager = new HolderFragmentManager<>(TaskRetainingFragment.class, FRAGMENT_TAG);
 
-    private final BaseTaskManager taskManager = new BaseTaskManager();
+    final TaskRetainingFragmentLogic logic = new TaskRetainingFragmentLogic();
 
-    public static TaskRetainingFragment getInstance(FragmentManager fragmentManager){
-        TaskRetainingFragmentCompat taskFragment = (TaskRetainingFragmentCompat) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
-        if(taskFragment == null){
-            taskFragment = new TaskRetainingFragmentCompat();
-            fragmentManager.beginTransaction().add(taskFragment, FRAGMENT_TAG).commit();
-        }
-        return taskFragment.logic;
+    public TaskRetainingFragment(){
+        setRetainInstance(true);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static TaskRetainingFragment getInstance(android.app.FragmentManager fragmentManager){
-        TaskRetainingFragmentV11 taskFragment = (TaskRetainingFragmentV11) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
-        if(taskFragment == null){
-            taskFragment = new TaskRetainingFragmentV11();
-            fragmentManager.beginTransaction().add(taskFragment, FRAGMENT_TAG).commit();
-        }
-        return taskFragment.logic;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sHolderFragmentManager.onHolderFragmentCreated(this);
     }
 
-
-
-    @MainThread
-    public void registerTaskManager(@NonNull String tag, @NonNull TaskManager manager){
-        if(fragmentTaskManagers.containsKey(tag)){
-            throw new IllegalStateException("A TaskManager is already been registered for the given tag '" + tag + "'.");
-        }
-        fragmentTaskManagers.put(tag, manager);
+    @Override
+    public void onStop() {
+        super.onStop();
+        //Is this extra detach needed? Correct usage of the TaskManagerLifeCycleProxy should be enough.
+        logic.getTaskManager().detach();
+        logic.assertActivityTasksAreDetached();
     }
 
-    @MainThread
-    public TaskManager findTaskManagerByTag(@NonNull String tag){
-        return fragmentTaskManagers.get(tag);
+    @Override
+    public void onDestroy() {
+        // The activity is destroyed, this method WON'T be called when the fragment is being
+        // propagated between activity instances.
+        super.onDestroy();
     }
 
-    public BaseTaskManager getActivityTaskManager(){
-        return taskManager;
+    public static TaskRetainingFragmentLogic holderFragmentFor(FragmentActivity activity) {
+        return sHolderFragmentManager.retainableFragmentFor(activity).logic;
     }
 
-    public void assertFragmentTasksAreDetached(){
-        if(!TaskManager.isStrictDebugModeEnabled()){
-            return;
-        }
-        for(Map.Entry<String, TaskManager> entry: fragmentTaskManagers.entrySet()){
-            try {
-                entry.getValue().assertAllTasksDetached();
-            } catch(IllegalStateException e){
-                throw new IllegalStateException("", e);
-            }
-        }
-    }
-
-    public void assertActivityTasksAreDetached(){
-        if(!TaskManager.isStrictDebugModeEnabled()){
-            return;
-        }
-        taskManager.assertAllTasksDetached();
+    public static TaskRetainingFragmentLogic holderFragmentFor(Fragment fragment) {
+        return sHolderFragmentManager.retainableFragmentFor(fragment).logic;
     }
 }

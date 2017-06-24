@@ -3,14 +3,16 @@ package org.neotech.library.retainabletasks.internal;
 import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 import android.util.Pair;
 
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskExecutor;
 import org.neotech.library.retainabletasks.TaskManager;
-import org.neotech.library.retainabletasks.TaskManagerProvider;
+import org.neotech.library.retainabletasks.TaskManagerOwner;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,20 +21,49 @@ import java.util.concurrent.Executor;
 /**
  * Created by Rolf on 29-2-2016.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class BaseTaskManager extends TaskManager {
 
     private static final String TAG = "BaseTaskManager";
 
-    protected final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
+    private final HashMap<String, Task<?, ?>> tasks = new HashMap<>();
+    private boolean isUIReady = true;
+    private WeakReference<TaskManager.TaskAttachListener> initialCallbackProvider;
 
-    protected boolean isUIReady = true;
+    /**
+     * Set the initial callback provider ({@link TaskManager.TaskAttachListener}). The
+     * {@link TaskManagerOwner} is responsible for setting the initial callback provider as soon as
+     * it takes ownership of the TaskManager and should preferably set it to null as soon as the
+     * ownership is ended.
+     * @param initialCallbackProvider the initial callback provider that the {@link BaseTaskManager}
+     *                                should use to resolve the initial {@link Task.Callback} for a
+     *                                given {@link Task}.
+     */
+    public void setInitialCallbackProvider(TaskManager.TaskAttachListener initialCallbackProvider){
+        this.initialCallbackProvider = new WeakReference<>(initialCallbackProvider);
+    }
+
+    /**
+     * Returns the initial callback provider ({@link TaskManager.TaskAttachListener}). The initial
+     * callback provider must be used when no {@link Task.Callback} is provided when
+     * {@link #execute} is called.
+     * @return The initial callback provider or null if the TaskManager is currently not associated
+     * with a {@link TaskManagerOwner}.
+     */
+    private @NonNull TaskManager.TaskAttachListener getInitialCallbackProvider() {
+        final TaskManager.TaskAttachListener attachListener = initialCallbackProvider == null ? null : initialCallbackProvider.get();
+        if(attachListener == null){
+            throw new IllegalStateException("Cannot call TaskManager.execute() after the TaskManagerOwner (Activity, Fragment etc.) instance does no longer own the TaskManager (has been destroyed).");
+        }
+        return attachListener;
+    }
 
     @Override
     public Task<?, ?> getTask(@NonNull String tag) {
         return tasks.get(tag);
     }
 
-    public void attach(TaskManagerProvider taskManagerProvider){
+    public void attach(TaskAttachListener taskManagerOwner){
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();
         }
@@ -50,7 +81,7 @@ public final class BaseTaskManager extends TaskManager {
         final ArrayList<Pair<Task<?, ?>, Task.Callback>> attachQueue = new ArrayList<>(tasks.size());
 
         for (Map.Entry<String, Task<?, ?>> task : tasks.entrySet()) {
-            Task.Callback callback = taskManagerProvider.onPreAttach(task.getValue());
+            Task.Callback callback = taskManagerOwner.onPreAttach(task.getValue());
             if (callback == null) {
                 throw new IllegalArgumentException("Could not attach Task '" + task.getKey() + "' because onPreAttach did not return a valid Callback listener! Did you override onPreAttach()?");
             }
@@ -123,6 +154,16 @@ public final class BaseTaskManager extends TaskManager {
         }
     }
 
+    @MainThread
+    public <Progress, Result> void execute(@NonNull Task<Progress, Result> task){
+        execute(task, getInitialCallbackProvider().onPreAttach(task), TaskExecutor.getDefaultExecutor());
+    }
+
+    @MainThread
+    public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Executor executor){
+        execute(task, getInitialCallbackProvider().onPreAttach(task), executor);
+    }
+
     @Override
     @MainThread
     public <Progress, Result> void execute(@NonNull Task<Progress, Result> task, @NonNull Task.Callback callback){
@@ -145,6 +186,16 @@ public final class BaseTaskManager extends TaskManager {
             task.removeCallback();
         }
         TaskExecutor.executeOnExecutor(task, executor);
+    }
+
+
+    @Override
+    @MainThread
+    public boolean isActive(@NonNull String tag) {
+        if(TaskManager.isStrictDebugModeEnabled()){
+            assertMainThread();
+        }
+        return tasks.get(tag) != null;
     }
 
     @Override
@@ -181,7 +232,7 @@ public final class BaseTaskManager extends TaskManager {
     }
 
 
-    public void assertMainThread() throws IllegalStateException {
+    private static void assertMainThread() throws IllegalStateException {
         if(Looper.getMainLooper() != Looper.myLooper()){
             throw new IllegalStateException("Method not called on the UI-thread!");
         }
@@ -213,22 +264,21 @@ public final class BaseTaskManager extends TaskManager {
         if(TaskManager.isStrictDebugModeEnabled()){
             assertMainThread();
         }
-        /**
-         * The problem described in the attach(TaskManagerProvider) doesn't apply to this method
-         * as all TaskManager methods should be executed on the UI-thread, meaning that no other
-         * method can be called while inside this method.
-         */
+        // The problem described in the attach(TaskManagerProvider) doesn't apply to this method as
+        // all TaskManager methods should be executed on the UI-thread, meaning that no other method
+        // can be called while inside this method.
         for(Map.Entry<String, Task<?, ?>> task: tasks.entrySet()){
             task.getValue().removeCallback();
         }
     }
 
     private void removeFinishedTask(Task expectedTask){
-        Task task = tasks.get(expectedTask.getTag());
-        if (task != expectedTask) {
+        final Task task = tasks.get(expectedTask.getTag());
+        if (task != null && task != expectedTask) {
             Log.i(TAG, "Task '" + expectedTask.getTag() + "' has already been removed, because another task with the same tag has been added while this task was finishing.");
+        } else {
+            tasks.remove(expectedTask.getTag());
         }
-        tasks.remove(expectedTask.getTag());
     }
 
     public void setUIReady(boolean isReady){
@@ -239,7 +289,7 @@ public final class BaseTaskManager extends TaskManager {
 
         private final Task.Callback callback;
 
-        public CallbackShadow(Task.Callback callback) {
+        CallbackShadow(Task.Callback callback) {
             this.callback = callback;
         }
 

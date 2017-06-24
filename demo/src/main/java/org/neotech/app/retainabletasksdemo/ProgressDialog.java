@@ -43,14 +43,16 @@ public class ProgressDialog extends DialogFragment implements DialogInterface.On
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_progress, null, false);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
+        @SuppressLint("InflateParams")
+        final View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_progress, null, false);
         progressPercentage = (TextView) view.findViewById(R.id.progress_percentage);
         progressCount = (TextView) view.findViewById(R.id.progress_count);
         progressBar = (ProgressBar) view.findViewById(android.R.id.progress);
         progressBar.setMax(100);
         progressBar.setIndeterminate(false);
+
         builder.setView(view);
         builder.setTitle(R.string.dialog_progress_title);
         builder.setPositiveButton(R.string.action_cancel, this);

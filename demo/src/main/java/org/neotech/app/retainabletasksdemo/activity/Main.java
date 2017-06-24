@@ -5,10 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +20,8 @@ import android.widget.ViewSwitcher;
 import org.neotech.app.retainabletasksdemo.ExtendedHtml;
 import org.neotech.app.retainabletasksdemo.R;
 import org.neotech.library.retainabletasks.Task;
+import org.neotech.library.retainabletasks.TaskAttach;
+import org.neotech.library.retainabletasks.TaskPostExecute;
 import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ import java.util.List;
 /**
  * Created by Rolf on 16-3-2016.
  */
-public class Main extends TaskActivityCompat implements Task.Callback {
+public final class Main extends TaskActivityCompat {
 
     private ViewSwitcher vSwitcher;
     private ListView list;
@@ -45,8 +43,8 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         vSwitcher = (ViewSwitcher) findViewById(R.id.switcher);
         list = (ListView) findViewById(android.R.id.list);
 
-        if(!getTaskManager().isRunning("list-loader")) {
-            getTaskManager().execute(new UselessLoadingTask("list-loader", this), this);
+        if(!getTaskManager().isActive("list-loader")) {
+            getTaskManager().execute(new UselessLoadingTask("list-loader", getApplicationContext()));
         }
     }
 
@@ -72,20 +70,15 @@ public class Main extends TaskActivityCompat implements Task.Callback {
         }
     }
 
-    @Override
-    public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
+    // This is quite fancy, we can just omit the Task parameter if we wan't to.
+    @TaskAttach("list-loader")
+    public void onAttach() {
         setListShown(false);
-        return this;
     }
 
-    @Override
-    public void onPreExecute(Task<?, ?> task) {
-
-    }
-
-    @Override
-    public void onPostExecute(Task<?, ?> raw) {
-        UselessLoadingTask task = (UselessLoadingTask) raw;
+    // Even fancier the generated code automatically handles subtypes of Task.
+    @TaskPostExecute("list-loader")
+    public void onPostExecute(UselessLoadingTask task) {
         list.setAdapter(new DemoAdapter(task.getResult()));
         setListShown(true);
     }
@@ -93,7 +86,7 @@ public class Main extends TaskActivityCompat implements Task.Callback {
     /**
      * Task just to demonstrate the principe of starting a task before the UI is ready.
      */
-    private static class UselessLoadingTask extends Task<Void, ArrayList<Demo>> {
+    protected static class UselessLoadingTask extends Task<Void, ArrayList<Demo>> {
 
         private final Context context;
 
@@ -107,9 +100,11 @@ public class Main extends TaskActivityCompat implements Task.Callback {
             SystemClock.sleep(1500);
             ArrayList<Demo> demos = new ArrayList<>(4);
             demos.add(new Demo(context, R.string.demo_examples_title, R.string.demo_examples_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityBasic.java", new Intent(context, DemoActivityBasic.class)));
+            demos.add(new Demo(context, R.string.demo_annotations_title, R.string.demo_annotations_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityAnnotations.java", new Intent(context, DemoActivityAnnotations.class)));
+
             demos.add(new Demo(context, R.string.demo_serial_title, R.string.demo_serial_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivitySerial.java", new Intent(context, DemoActivitySerial.class)));
             demos.add(new Demo(context, R.string.demo_fragments_title, R.string.demo_fragments_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityFragments.java", new Intent(context, DemoActivityFragments.class)));
-            demos.add(new Demo(context, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(context, DemoActivityV11.class)));
+            demos.add(new Demo(context, R.string.demo_no_compat_title, R.string.demo_no_compat_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityV11.java", new Intent(context, DemoActivityLegacy.class)));
             return demos;
         }
     }

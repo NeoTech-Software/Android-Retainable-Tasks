@@ -18,7 +18,7 @@ import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskExecutor;
 import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
-public class DemoActivityBasic extends TaskActivityCompat implements View.OnClickListener, Task.AdvancedCallback, OnAlertDialogClickListener {
+public final class DemoActivityBasic extends TaskActivityCompat implements View.OnClickListener, Task.AdvancedCallback, OnAlertDialogClickListener {
 
     private static final String TASK_RETAIN_UI_STATE = "retain-ui-state";
     private static final String TASK_PROGRESS = "progress-dialog";
@@ -43,12 +43,11 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
     @Override
     public Task.Callback onPreAttach(@NonNull Task<?, ?> task) {
         if(task.getTag().equals(TASK_RETAIN_UI_STATE)){
-            /**
-             * the onPreAttach method will only be called if the task did not deliver its result
-             * and thus is still available/referenced by the TaskManger.
-             *
-             * At this point the UI can be restored to the "task is running" state.
-             */
+
+            // The onPreAttach method will only be called if the task did not deliver its result and
+            // thus is still available/referenced by the TaskManger.
+
+            // At this point the UI can be restored to the "task is running" state.
             if (!task.isResultDelivered()) { //This call isn't necessary.
                 retainUserInterfaceButton.setEnabled(false);
                 retainUserInterfaceButton.setText("" + task.getLastKnownProgress());
@@ -63,7 +62,7 @@ public class DemoActivityBasic extends TaskActivityCompat implements View.OnClic
     public void onClick(View v) {
         final int id = v.getId();
         if(id == R.id.button_progress_task) {
-            if (getTaskManager().isRunning(TASK_PROGRESS)) {
+            if (getTaskManager().isActive(TASK_PROGRESS)) {
                 Toast.makeText(this, R.string.toast_task_already_running, Toast.LENGTH_SHORT).show();
             }
             SimpleTask task = new SimpleTask(TASK_PROGRESS);

@@ -1,5 +1,6 @@
 package org.neotech.library.retainabletasks.providers;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -7,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskManager;
 import org.neotech.library.retainabletasks.TaskManagerLifeCycleProxy;
-import org.neotech.library.retainabletasks.TaskManagerProvider;
+import org.neotech.library.retainabletasks.TaskManagerOwner;
 
 /**
  * <p>
@@ -32,25 +33,37 @@ import org.neotech.library.retainabletasks.TaskManagerProvider;
  * @see TaskManager
  * @see TaskManagerLifeCycleProxy
  */
-public class TaskFragmentCompat extends Fragment implements TaskManagerProvider {
+public abstract class TaskFragmentCompat extends Fragment implements TaskManagerOwner {
 
     private final TaskManagerLifeCycleProxy proxy = new TaskManagerLifeCycleProxy(this);
 
     @Override
+    @CallSuper
     public void onStart() {
         super.onStart();
         proxy.onStart();
     }
 
     @Override
+    @CallSuper
     public void onStop() {
         proxy.onStop();
         super.onStop();
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        proxy.onDestroy();
+    }
+
+    @Override
     public final TaskManager getTaskManager(){
        return proxy.getTaskManager();
+    }
+
+    public final void bindTaskTarget(Object object){
+        proxy.bindTaskTarget(object);
     }
 
     @Override

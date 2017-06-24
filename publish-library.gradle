@@ -1,40 +1,47 @@
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = publishedGroupId // Maven Group ID for the artifact
+
+
+
+group = GROUP // Maven Group ID for the artifact
 
 install {
     repositories.mavenInstaller {
         // This generates POM.xml with proper parameters
+
         pom {
 
+            groupId = GROUP
+            artifactId = POM_ARTIFACT_ID
+            version = VERSION_NAME
+
             project {
-                packaging 'aar'
-                groupId publishedGroupId
-                artifactId artifact
+                packaging POM_PACKAGING
+
 
                 // Add your description here
-                name libraryName
-                description libraryDescription
-                url siteUrl
+                name POM_NAME
+                description POM_DESCRIPTION
+                url POM_URL
 
                 // Set your license
                 licenses {
                     license {
-                        name licenseName
-                        url licenseUrl
+                        name POM_LICENCE_NAME
+                        url POM_LICENCE_URL
                     }
                 }
                 developers {
                     developer {
-                        id developerId
-                        name developerName
-                        email developerEmail
+                        id POM_DEVELOPER_ID
+                        name POM_DEVELOPER_NAME
+                        email POM_DEVELOPER_EMAIL
                     }
                 }
                 scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
+                    connection POM_SCM_CONNECTION
+                    developerConnection POM_SCM_DEV_CONNECTION
+                    url POM_SCM_URL
 
                 }
             }
@@ -42,14 +49,14 @@ install {
     }
 }
 
-
-
-
 apply plugin: 'com.jfrog.bintray'
 
-version = libraryVersion
+version = VERSION_NAME
 
-if (project.hasProperty("android")) { // Android libraries
+if (project.getPlugins().hasPlugin('com.android.application') ||
+        project.getPlugins().hasPlugin('com.android.library')) {
+    // Android libraries
+
     task sourcesJar(type: Jar) {
         classifier = 'sources'
         from android.sourceSets.main.java.srcDirs
@@ -60,7 +67,15 @@ if (project.hasProperty("android")) { // Android libraries
         failOnError = false
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
-} else { // Java libraries
+
+    // Makes sure JavaDoc knows our dependencies
+    afterEvaluate {
+        javadoc.classpath += files(android.libraryVariants.collect { variant ->
+            variant.javaCompile.classpath.files
+        })
+    }
+} else {
+    // Java libraries
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
@@ -69,7 +84,7 @@ if (project.hasProperty("android")) { // Android libraries
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
-    from javadoc.destinationDir
+    from javadoc.getDestinationDir()
 }
 
 artifacts {
@@ -86,24 +101,20 @@ bintray {
     key = properties.getProperty("bintray.apikey")
 
     configurations = ['archives']
+
+    // Bintry package information
     pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        desc = libraryDescription
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = allLicenses
+        repo = BINTRAY_REPO
+        name = POM_ARTIFACT_ID
+        desc = POM_DESCRIPTION
+        websiteUrl = POM_URL
+        vcsUrl = POM_SCM_URL
+        licenses = [BINTRAY_LICENCE]
         publish = true
         publicDownloadNumbers = true
         version {
-            desc = libraryDescription
-            /*
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password")
-                //Optional. The passphrase for GPG signing'
-            }
-            */
+            name = VERSION_NAME
+            released = new Date();
         }
     }
 }

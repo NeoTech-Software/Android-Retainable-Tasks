@@ -19,7 +19,7 @@ import org.neotech.app.retainabletasksdemo.TestFragment;
 
 import java.util.HashMap;
 
-public class DemoActivityFragments extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public final class DemoActivityFragments extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String[] FRAGMENT_TAGS = new String[]{"Fragment 1", "Fragment 2", "Fragment 3"};
 
@@ -118,7 +118,7 @@ public class DemoActivityFragments extends AppCompatActivity  implements Navigat
         return true;
     }
 
-    public static class FragmentAdapter {
+    private static class FragmentAdapter {
 
         private final HashMap<String, Class<? extends Fragment>> fragments;
 
@@ -140,10 +140,19 @@ public class DemoActivityFragments extends AppCompatActivity  implements Navigat
         }
 
         public Fragment setCurrentFragment(String tag){
+
+            final FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+            // Make sure we have a cool animation
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+
             //Retrieve the existing fragment or create a new one.
             Fragment fragment = fragmentManager.findFragmentByTag(tag);
             if(fragment == null) {
                 fragment = instantiate(fragments.get(tag));
+                transaction.add(containerId, fragment, tag);
+            } else {
+                transaction.attach(fragment);
             }
 
             //Check if the currently visible fragment is not equal to the fragment we're about to show.
@@ -152,11 +161,11 @@ public class DemoActivityFragments extends AppCompatActivity  implements Navigat
                 return fragment;
             }
 
-            //Show the new fragment.
-            fragmentManager.beginTransaction()
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(containerId, fragment, tag)
-                    .commit();
+            final Fragment currentFragment = fragmentManager.findFragmentById(containerId);
+            if(currentFragment != null){
+                transaction.detach(currentFragment);
+            }
+            transaction.commit();
             return fragment;
         }
 
