@@ -60,6 +60,15 @@ dependencies {
 }
 ```
 
+Because of the dependency on Google's new Architecture Lifecyle library you must add Google's maven repository to your top-level build.gradle file (if you did not already do this).
+```groovy
+allprojects {
+    repositories {
+        maven { url 'https://maven.google.com' }
+    }
+}
+```
+
 ## Why and when
 
 *When and why should I use this library?* Always! its awesome! No, obviously you should not always use this library. **This library is useful when you need to do things in the **background** which are heavily bound to the user-interface** like: Refreshing a list which is populated from a database, loading an article from a network source or decoding an image, all those things are quit tightly bound to the user-interface and when the device rotates you don't want to cancel this work or do it again. If you need: task scheduling, automatic retries, task persistence across reboots, task constrains etc. then you need to use an additional library.
