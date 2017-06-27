@@ -21,6 +21,7 @@ import org.neotech.app.retainabletasksdemo.ExtendedHtml;
 import org.neotech.app.retainabletasksdemo.R;
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskAttach;
+import org.neotech.library.retainabletasks.TaskManager;
 import org.neotech.library.retainabletasks.TaskPostExecute;
 import org.neotech.library.retainabletasks.providers.TaskActivityCompat;
 
@@ -39,6 +40,8 @@ public final class Main extends TaskActivityCompat {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportActionBar().setSubtitle(getString(R.string.library_version, TaskManager.getVersionName()));
 
         vSwitcher = (ViewSwitcher) findViewById(R.id.switcher);
         list = (ListView) findViewById(android.R.id.list);

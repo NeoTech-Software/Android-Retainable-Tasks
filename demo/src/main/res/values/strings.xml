@@ -32,6 +32,7 @@
 
     <string name="menu_github">View on GitHub</string>
 
+    <string name="library_version">Library version: %1$s</string>
 
     <string name="demo_fragments_title">Fragment TaskManager</string>
     <string name="demo_fragments_description">"<![CDATA[This demonstration shows how individual Fragments use the <code>TaskManager</code> class to start and manage <code>Tasks</code>. Each Fragment extends from the <code>TaskFragmentCompat</code> class, which means that each Fragment has it's own <code>TaskManager</code> instance. <code>Task</code> results are only delivered to the Fragment if it is currently attached to the Activity.]]>"</string>
@@ -44,7 +45,6 @@
 
     <string name="demo_annotations_title">Annotations example</string>
     <string name="demo_annotations_description">"<![CDATA[This demonstration shows an Activity which extends <code>TaskActivityCompat</code> and uses Annotations to receive <code>Task</code> lifecycle events like <code>onPostExecute</code>.]]>"</string>
-
 
     <string name="demo_serial_title">Serial execution</string>
     <string name="demo_serial_description">"<![CDATA[By default <code>Tasks</code> are executed using a parallel Executor. This demonstration shows how <code>Tasks</code> can be executed in serial using the <code>TaskManager.execute(Task, Callback, Executor)</code> method.]]>"</string>

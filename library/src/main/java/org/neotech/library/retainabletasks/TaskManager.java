@@ -284,4 +284,12 @@ public abstract class TaskManager {
             return globalInstance;
         }
     }
+
+    /**
+     * Returns the version of the library.
+     * @return the version name of the library.
+     */
+    public static String getVersionName(){
+        return BuildConfig.VERSION_NAME;
+    }
 }
