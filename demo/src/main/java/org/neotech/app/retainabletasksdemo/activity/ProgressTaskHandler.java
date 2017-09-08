@@ -34,17 +34,17 @@ public final class ProgressTaskHandler {
     }
 
     @TaskAttach(TASK_PROGRESS)
-    public void onAttach(Task task){
+    public void onAttach(SimpleTask task){
         // Task attaches, make sure to show the progress dialog and update the progress if needed.
         progressDialog = ProgressDialog.showIfNotShowing(demoActivityAnnotations.getSupportFragmentManager(), DIALOG_PROGRESS);
         if(task.getLastKnownProgress() != null) {
-            progressDialog.setProgress((Integer) task.getLastKnownProgress());
+            progressDialog.setProgress(task.getLastKnownProgress());
         }
     }
 
     @TaskProgress(TASK_PROGRESS)
-    public void onProgress(Task<?, ?> task, Object progress){
-        progressDialog.setProgress((int) progress);
+    public void onProgress(SimpleTask task){
+        progressDialog.setProgress(task.getLastKnownProgress());
     }
 
     // Now this is cool, we can have a single method handle both the normal onPostExecute and the
