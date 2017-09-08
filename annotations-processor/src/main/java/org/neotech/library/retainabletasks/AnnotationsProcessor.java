@@ -157,18 +157,7 @@ public final class AnnotationsProcessor extends AbstractProcessor {
             callbackImplementation.addMethod(createTaskCallbackMethod("onPreExecute", methods.getElementForPreExecute()));
             callbackImplementation.addMethod(createTaskCallbackMethod("onPostExecute", methods.getElementForPostExecute()));
             callbackImplementation.addMethod(createTaskCallbackMethod("onCanceled", methods.getElementForCancel()));
-
-            MethodSpec.Builder progressUpdateMethod = MethodSpec.methodBuilder("onProgressUpdate")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(CLASS_TASK, "task")
-                    .addParameter(TypeName.OBJECT, "object");
-
-            if(methods.getElementForProgress() != null) {
-                progressUpdateMethod.addStatement("target.$L(task, object)", methods.getElementForProgress().getSimpleName());
-            }
-            callbackImplementation.addMethod(progressUpdateMethod.build());
-
+            callbackImplementation.addMethod(createTaskCallbackMethodForProgress(methods.getElementForProgress()));
 
             if(methods.getElementForAttach() != null) {
                 final boolean onlyCallOnReAttach = methods.getElementForAttach().getAnnotation(TaskAttach.class).onlyCallOnReAttach();
@@ -179,7 +168,21 @@ public final class AnnotationsProcessor extends AbstractProcessor {
                 if(parameters.size() == 0) {
                     getListenerForMethod.addStatement("target.$L()", methods.getElementForAttach().getSimpleName());
                 } else {
-                    getListenerForMethod.addStatement("target.$L(task)", methods.getElementForAttach().getSimpleName());
+                    // One parameter, check it and call the method.
+                    final VariableElement parameter = parameters.get(0);
+                    final TypeMirror taskType = processingEnv.getTypeUtils().erasure(processingEnv.getElementUtils().getTypeElement(CLASS_TASK.reflectionName()).asType());
+
+                    if (!processingEnv.getTypeUtils().isAssignable(parameter.asType(), taskType)) {
+                        // Parameter not an instance of Task
+                        error(parameter, "Type of parameter '%s' is not an instance of '%s'!", parameter.getSimpleName(), taskType);
+                    } else {
+                        // Check if the class to cast too is accessible.
+                        final Element requiredElement = processingEnv.getTypeUtils().asElement(parameter.asType());
+                        if (!requiredElement.getModifiers().contains(Modifier.PUBLIC) && !requiredElement.getModifiers().contains(Modifier.PROTECTED)) {
+                            error(parameter, "Type of parameter '%s' is not public or protected accessible! This prevents Android-Retainable-Tasks from casting '%s' to '%s'.\nTo fix this either the type of the parameter or make the class accessible by adding the public or protected modifier!", parameter.getSimpleName(), taskType, parameter.asType().toString());
+                        }
+                        getListenerForMethod.addStatement("target.$L(($T) task)", methods.getElementForAttach().getSimpleName(), parameter.asType());
+                    }
                 }
                 if(onlyCallOnReAttach){
                     getListenerForMethod.endControlFlow();
@@ -208,6 +211,47 @@ public final class AnnotationsProcessor extends AbstractProcessor {
         return JavaFile.builder(bindingClassName.packageName(), generatedClass)
                 .addFileComment("Generated code from the Android Retainable Tasks annotations processor. Do not modify!")
                 .build();
+    }
+
+    private MethodSpec createTaskCallbackMethodForProgress(@Nullable Element progressElement){
+        MethodSpec.Builder progressUpdateMethod = MethodSpec.methodBuilder("onProgressUpdate")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(CLASS_TASK, "task")
+                .addParameter(TypeName.OBJECT, "object");
+
+        if(progressElement != null) {
+            final List<? extends VariableElement> parameters = ((ExecutableElement) progressElement).getParameters();
+            if(parameters.size() == 0) {
+                progressUpdateMethod.addStatement("target.$L()", progressElement.getSimpleName());
+            } else if(parameters.size() >= 1 && parameters.size() <= 2){
+                // One or two parameters, check it and call the method.
+                final VariableElement parameterTask = parameters.get(0);
+                final TypeMirror taskType = processingEnv.getTypeUtils().erasure(processingEnv.getElementUtils().getTypeElement(CLASS_TASK.reflectionName()).asType());
+
+                if (!processingEnv.getTypeUtils().isAssignable(parameterTask.asType(), taskType)) {
+                    // Parameter not an instance of Task
+                    error(parameterTask, "Type of parameter '%s' is not an instance of '%s'!", parameterTask.getSimpleName(), taskType);
+                    return progressUpdateMethod.build();
+                }
+                // Check if the class to cast to is accessible.
+                final Element requiredElement = processingEnv.getTypeUtils().asElement(parameterTask.asType());
+                if (!requiredElement.getModifiers().contains(Modifier.PUBLIC) && !requiredElement.getModifiers().contains(Modifier.PROTECTED)) {
+                    error(parameterTask, "Type of parameter '%s' is not public or protected accessible! This prevents Android-Retainable-Tasks from casting '%s' to '%s'.\nTo fix this either the type of the parameter or make the class accessible by adding the public or protected modifier!", parameterTask.getSimpleName(), taskType, parameterTask.asType().toString());
+                    return progressUpdateMethod.build();
+                }
+
+                if(parameters.size() == 2){
+                    progressUpdateMethod.addStatement("target.$L(($T) task, object)", progressElement.getSimpleName(), parameterTask.asType());
+                } else {
+                    progressUpdateMethod.addStatement("target.$L(($T) task)", progressElement.getSimpleName(), parameterTask.asType());
+                }
+
+            } else {
+                progressUpdateMethod.addComment("No annotated method found for $L", progressElement.getSimpleName());
+            }
+        }
+        return progressUpdateMethod.build();
     }
 
     private MethodSpec createTaskCallbackMethod(String methodName, @Nullable Element methodToCall){

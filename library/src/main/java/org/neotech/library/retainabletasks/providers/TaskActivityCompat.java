@@ -51,8 +51,8 @@ public abstract class TaskActivityCompat extends AppCompatActivity implements Ta
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         proxy.onDestroy();
+        super.onDestroy();
     }
 
     @Override

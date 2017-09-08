@@ -56,8 +56,8 @@ public abstract class TaskActivity extends Activity implements TaskManagerOwner 
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         proxy.onDestroy();
+        super.onDestroy();
     }
 
     @Override
