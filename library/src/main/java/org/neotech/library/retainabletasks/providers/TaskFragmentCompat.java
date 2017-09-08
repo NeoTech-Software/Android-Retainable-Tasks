@@ -53,8 +53,8 @@ public abstract class TaskFragmentCompat extends Fragment implements TaskManager
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         proxy.onDestroy();
+        super.onDestroy();
     }
 
     @Override

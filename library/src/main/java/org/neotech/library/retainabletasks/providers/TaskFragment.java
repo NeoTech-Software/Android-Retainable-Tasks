@@ -57,8 +57,8 @@ public abstract class TaskFragment extends Fragment implements TaskManagerOwner 
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         proxy.onDestroy();
+        super.onDestroy();
     }
 
     @Override

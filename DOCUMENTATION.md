@@ -229,8 +229,14 @@ public class MyBaseActivity extends SomeActivity implements TaskManagerOwner {
 
     @Override
     protected void onStop() {
-        proxy.onStop();
+        proxy.onStop(); // Call before super!
         super.onStop();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        proxy.onDestroy(); // Call before super!
+        super.onDestroy();
     }
 
     @Override
