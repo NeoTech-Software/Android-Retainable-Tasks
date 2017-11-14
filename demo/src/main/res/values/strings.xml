@@ -46,6 +46,9 @@
     <string name="demo_annotations_title">Annotations example</string>
     <string name="demo_annotations_description">"<![CDATA[This demonstration shows an Activity which extends <code>TaskActivityCompat</code> and uses Annotations to receive <code>Task</code> lifecycle events like <code>onPostExecute</code>.]]>"</string>
 
+    <string name="demo_lifecycle_library_title">Google Architecture Lifecycle example</string>
+    <string name="demo_lifecycle_library_description">"<![CDATA[This demonstration shows an Activity which extends a normal <code>AppCompatActivity</code> and uses the <code>Lifecycle</code> class from Google's Architecture library to hook the Activity lifecycle to the <code>TaskManagerLifeCycleProxy</code>. This basically shows how the library can be used without extending from the <code>TaskActivityCompat</code> class.]]>"</string>
+
     <string name="demo_serial_title">Serial execution</string>
     <string name="demo_serial_description">"<![CDATA[By default <code>Tasks</code> are executed using a parallel Executor. This demonstration shows how <code>Tasks</code> can be executed in serial using the <code>TaskManager.execute(Task, Callback, Executor)</code> method.]]>"</string>
 

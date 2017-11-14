@@ -104,6 +104,7 @@ public final class Main extends TaskActivityCompat {
             ArrayList<Demo> demos = new ArrayList<>(4);
             demos.add(new Demo(context, R.string.demo_examples_title, R.string.demo_examples_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityBasic.java", new Intent(context, DemoActivityBasic.class)));
             demos.add(new Demo(context, R.string.demo_annotations_title, R.string.demo_annotations_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityAnnotations.java", new Intent(context, DemoActivityAnnotations.class)));
+            demos.add(new Demo(context, R.string.demo_lifecycle_library_title, R.string.demo_lifecycle_library_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityLifeCycleLibrary.java", new Intent(context, DemoActivityLifeCycleLibrary.class)));
 
             demos.add(new Demo(context, R.string.demo_serial_title, R.string.demo_serial_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivitySerial.java", new Intent(context, DemoActivitySerial.class)));
             demos.add(new Demo(context, R.string.demo_fragments_title, R.string.demo_fragments_description, "org/neotech/app/retainabletasksdemo/activity/DemoActivityFragments.java", new Intent(context, DemoActivityFragments.class)));
