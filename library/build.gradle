@@ -10,13 +10,15 @@ archivesBaseName = POM_ARTIFACT_ID
 group = GROUP
 version = VERSION_NAME
 
+preBuild.dependsOn ":annotations:build"
+
 android {
-    compileSdkVersion 26
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionName = VERSION_NAME
     }
     buildTypes {
@@ -32,20 +34,13 @@ configurations {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile project(':annotations')
+    api project(':annotations')
+    implementation 'com.android.support:appcompat-v7:27.0.1'
+    javadoc 'com.android.support:appcompat-v7:27.0.1'
 
-    // Android Architecture Lifecycle library to support using the TaskManagerLifeCycleProxy in
-    // combination with LifecycleOwner.getLifecycle().addObserver().
-    compile 'android.arch.lifecycle:extensions:1.0.0-alpha9'
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha9"
-
-    // Support library for the support library specific TaskManagerOwners (TaskActivityCompat).
-    compile 'com.android.support:appcompat-v7:26.0.2'
-    javadoc 'com.android.support:appcompat-v7:26.0.2'
-
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 apply from: rootProject.file('publish-library.gradle')

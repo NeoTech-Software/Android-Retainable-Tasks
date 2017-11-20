@@ -11,14 +11,14 @@ group = GROUP
 version = VERSION_NAME
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':annotations')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':annotations')
 
     // Java Poet to create Java source files
-    compile 'com.squareup:javapoet:1.9.0'
+    implementation 'com.squareup:javapoet:1.9.0'
 
     // For NotNull, Nullable etc. annotations
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
     // Fix for warning: "bootstrap class path not set in conjunction with -source 1.7"
     compileOnly files(Jvm.current().getToolsJar())

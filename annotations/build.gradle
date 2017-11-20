@@ -11,7 +11,7 @@ group = GROUP
 version = VERSION_NAME
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Fix for warning: "bootstrap class path not set in conjunction with -source 1.7"
     compileOnly files(Jvm.current().getToolsJar())

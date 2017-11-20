@@ -68,12 +68,6 @@ if (project.getPlugins().hasPlugin('com.android.application') ||
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
 
-    // Makes sure JavaDoc knows our dependencies
-    afterEvaluate {
-        javadoc.classpath += files(android.libraryVariants.collect { variant ->
-            variant.javaCompile.classpath.files
-        })
-    }
 } else {
     // Java libraries
     task sourcesJar(type: Jar, dependsOn: classes) {
