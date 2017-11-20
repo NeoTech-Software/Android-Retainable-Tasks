@@ -13,12 +13,12 @@ version = VERSION_NAME
 preBuild.dependsOn ":annotations:build"
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionName = VERSION_NAME
     }
     buildTypes {
@@ -36,16 +36,9 @@ configurations {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation project(':annotations')
-
-    // Android Architecture Lifecycle library to support using the TaskManagerLifeCycleProxy in
-    // combination with LifecycleOwner.getLifecycle().addObserver().
-    //implementation 'android.arch.lifecycle:extensions:1.0.0'
-    //annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
-
-    // Support library for the support library specific TaskManagerOwners (TaskActivityCompat).
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    javadoc 'com.android.support:appcompat-v7:26.1.0'
+    api project(':annotations')
+    implementation 'com.android.support:appcompat-v7:27.0.1'
+    javadoc 'com.android.support:appcompat-v7:27.0.1'
 
     testImplementation 'junit:junit:4.12'
 }
