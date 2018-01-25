@@ -36,9 +36,9 @@ configurations {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    api project(':annotations')
-    implementation 'com.android.support:appcompat-v7:27.0.1'
-    javadoc 'com.android.support:appcompat-v7:27.0.1'
+    api 'org.neotech.library:android-retainable-tasks-annotations:1.0.0-rc-4'
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    javadoc 'com.android.support:appcompat-v7:27.0.2'
 
     testImplementation 'junit:junit:4.12'
 }
