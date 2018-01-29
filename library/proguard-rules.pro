@@ -15,3 +15,5 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class * implements org.neotech.library.retainabletasks.internal.TaskAttachBinding { public <init>(...); }

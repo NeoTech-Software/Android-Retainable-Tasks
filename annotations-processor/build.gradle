@@ -13,7 +13,8 @@ version = VERSION_NAME
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation 'org.neotech.library:android-retainable-tasks-annotations:1.0.0-rc-4'
+    implementation 'org.neotech.library:android-retainable-tasks-annotations:1.0.0-rc-5'
+    //implementation project(':annotations')
 
     // Java Poet to create Java source files
     implementation 'com.squareup:javapoet:1.9.0'
