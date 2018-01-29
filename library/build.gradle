@@ -23,8 +23,9 @@ android {
     }
     buildTypes {
         release {
+            consumerProguardFiles 'proguard-rules.pro'
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            useProguard true
         }
     }
 }
@@ -36,7 +37,9 @@ configurations {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    api 'org.neotech.library:android-retainable-tasks-annotations:1.0.0-rc-4'
+    api 'org.neotech.library:android-retainable-tasks-annotations:1.0.0-rc-5'
+    //api project(':annotations')
+
     implementation 'com.android.support:appcompat-v7:27.0.2'
     javadoc 'com.android.support:appcompat-v7:27.0.2'
 
