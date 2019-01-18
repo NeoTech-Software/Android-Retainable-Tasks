@@ -1,6 +1,6 @@
 package org.neotech.app.retainabletasksdemo;
 
-import android.support.v4.app.DialogFragment;
+import androidx.fragment.app.DialogFragment;
 
 public interface OnAlertDialogClickListener {
     void onDialogFragmentClick(DialogFragment fragment, int which);

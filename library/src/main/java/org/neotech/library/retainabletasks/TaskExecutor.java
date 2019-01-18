@@ -1,7 +1,7 @@
 package org.neotech.library.retainabletasks;
 
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.Queue;

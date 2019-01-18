@@ -1,9 +1,9 @@
 package org.neotech.library.retainabletasks.providers;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskManager;

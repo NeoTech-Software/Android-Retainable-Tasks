@@ -2,7 +2,7 @@ package org.neotech.library.retainabletasks.internal;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import org.neotech.library.retainabletasks.internal.utilities.HolderFragmentManagerLegacy;
 

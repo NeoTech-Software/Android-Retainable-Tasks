@@ -17,7 +17,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@android:id/message" />
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         android:layout_below="@android:id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         android:layout_below="@android:id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

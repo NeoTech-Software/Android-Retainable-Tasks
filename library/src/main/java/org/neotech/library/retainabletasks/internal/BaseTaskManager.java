@@ -1,9 +1,9 @@
 package org.neotech.library.retainabletasks.internal;
 
 import android.os.Looper;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
 import android.util.Log;
 import android.util.Pair;
 

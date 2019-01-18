@@ -5,7 +5,7 @@ import android.app.Application;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Build;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * This class differs from the {@link HolderFragmentManager} quite allot because for legacy
  * fragments there is no way to monitor their lifecycle because
- * {@link android.support.v4.app.FragmentManager.FragmentLifecycleCallbacks} is a support library
+ * {@link androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks} is a support library
  * only feature.
  *
  */

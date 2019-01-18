@@ -22,8 +22,8 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(":annotations-processor")
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
 
     //LeakCanary is used to detect memory leaks in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'

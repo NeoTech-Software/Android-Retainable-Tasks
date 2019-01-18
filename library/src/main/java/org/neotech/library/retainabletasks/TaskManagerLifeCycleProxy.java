@@ -2,14 +2,14 @@ package org.neotech.library.retainabletasks;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 import android.os.Build;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 import org.neotech.library.retainabletasks.internal.TaskAttachBinding;

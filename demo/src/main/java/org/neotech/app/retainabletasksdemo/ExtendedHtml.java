@@ -2,7 +2,7 @@ package org.neotech.app.retainabletasksdemo;
 
 import android.os.Build;
 import android.os.Parcel;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
