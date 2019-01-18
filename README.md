@@ -53,13 +53,13 @@ Android-Retainable-Tasks is available on jcenter just like many other Android/Ja
 ```groovy
 dependencies {
     // Gradle < 3.0
-    compile 'org.neotech.library:android-retainable-tasks:1.0.0-rc-5'
+    compile 'org.neotech.library:android-retainable-tasks:1.0.1'
     
     // Gradle >= 3.0
-    implementation 'org.neotech.library:android-retainable-tasks:1.0.0-rc-5'
+    implementation 'org.neotech.library:android-retainable-tasks:1.0.1'
     
     // Needed if you want to use annotations (all Gradle versions)
-    annotationProcessor 'org.neotech.library:android-retainable-tasks-compiler:1.0.0-rc-5'
+    annotationProcessor 'org.neotech.library:android-retainable-tasks-compiler:1.0.1'
 }
 ```
 

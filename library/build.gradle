@@ -36,7 +36,7 @@ configurations {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    //api 'org.neotech.library:android-retainable-tasks-annotations:1.0.0'
+    //api 'org.neotech.library:android-retainable-tasks-annotations:1.0.1'
     api project(':annotations')
 
     implementation 'androidx.appcompat:appcompat:1.0.2'
