@@ -3,7 +3,7 @@ package org.neotech.library.retainabletasks.providers;
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.os.Build;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskManager;

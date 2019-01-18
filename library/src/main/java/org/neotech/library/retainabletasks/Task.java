@@ -1,9 +1,9 @@
 package org.neotech.library.retainabletasks;
 
 import android.os.*;
-import android.support.annotation.MainThread;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 
 import java.util.concurrent.Callable;

@@ -1,8 +1,5 @@
 apply plugin: 'com.github.dcendents.android-maven'
 
-
-
-
 group = GROUP // Maven Group ID for the artifact
 
 install {

@@ -3,7 +3,7 @@ package org.neotech.library.retainabletasks.internal.utilities;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 /**
  * A simple class that implements the methods in the {@link Application.ActivityLifecycleCallbacks}

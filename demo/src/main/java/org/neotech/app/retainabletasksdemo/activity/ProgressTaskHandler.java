@@ -1,11 +1,10 @@
 package org.neotech.app.retainabletasksdemo.activity;
 
-import android.support.design.widget.Snackbar;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.neotech.app.retainabletasksdemo.ProgressDialog;
 import org.neotech.app.retainabletasksdemo.R;
 import org.neotech.app.retainabletasksdemo.tasks.SimpleTask;
-import org.neotech.library.retainabletasks.Task;
 import org.neotech.library.retainabletasks.TaskAttach;
 import org.neotech.library.retainabletasks.TaskCancel;
 import org.neotech.library.retainabletasks.TaskPostExecute;

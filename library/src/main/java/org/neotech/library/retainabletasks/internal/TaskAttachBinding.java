@@ -1,6 +1,6 @@
 package org.neotech.library.retainabletasks.internal;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import org.neotech.library.retainabletasks.Task;
 

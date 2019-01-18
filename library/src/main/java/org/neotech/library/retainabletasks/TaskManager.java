@@ -1,12 +1,12 @@
 package org.neotech.library.retainabletasks;
 
 import android.app.Activity;
-import android.support.annotation.CheckResult;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.CheckResult;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import org.neotech.library.retainabletasks.internal.BaseTaskManager;
 import org.neotech.library.retainabletasks.internal.TaskRetainingFragment;
