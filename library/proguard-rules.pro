@@ -17,3 +17,4 @@
 #}
 
 -keep class * implements org.neotech.library.retainabletasks.internal.TaskAttachBinding { public <init>(...); }
+-keep class * implements org.neotech.library.retainabletasks.TaskManagerOwner
