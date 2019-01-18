@@ -2,10 +2,12 @@ import org.gradle.internal.jvm.Jvm
 
 apply plugin: 'java'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
 
-//Without this line the Bintray upload will fail as it uses the module directory name as artifactId
+// Override artifactID (normally the module name is used)
 archivesBaseName = POM_ARTIFACT_ID
 group = GROUP
 version = VERSION_NAME
@@ -17,7 +19,7 @@ dependencies {
     //implementation project(':annotations')
 
     // Java Poet to create Java source files
-    implementation 'com.squareup:javapoet:1.9.0'
+    implementation 'com.squareup:javapoet:1.11.1'
 
     // For NotNull, Nullable etc. annotations
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
